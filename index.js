@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const winston = require('winston');
+const helmet = require('helmet');
+const compression = require('compression');
 
 const bodyParser = require('body-parser');
 const app = express();
@@ -17,7 +19,12 @@ const logger = winston.createLogger({
   ]
 });
 
+app.use(helmet());
+app.use(compression());
 app.use(bodyParser.json());
+
+app.disable('etag');
+app.disable('x-powered-by');
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => logger.info(`Listining on port ${PORT}`));
