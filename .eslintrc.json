@@ -1,0 +1,16 @@
+{
+  "plugins": ["security"],
+  "extends": ["eslint:recommended", "plugin:security/recommended"],
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "script",
+    "ecmaFeatures": {}
+  },
+  "env": {
+    "node": true
+  },
+  "rules": {
+    "no-console": 1,
+    "quotes": ["error", "single", { "allowTemplateLiterals": true }]
+  }
+}
