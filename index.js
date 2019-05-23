@@ -4,6 +4,10 @@ const winston = require('winston');
 const helmet = require('helmet');
 const compression = require('compression');
 
+// Catch async errors and pass them to the error route
+require('make-promises-safe');
+require('express-async-errors');
+
 const bodyParser = require('body-parser');
 const app = express();
 
@@ -25,6 +29,11 @@ app.use(bodyParser.json());
 
 app.disable('etag');
 app.disable('x-powered-by');
+
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  res.status(err.statusCode || 500).json({ error: err.message });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => logger.info(`Listining on port ${PORT}`));
