@@ -25,24 +25,25 @@ class UserService {
     const isDuplicateEmail = await userCollection.findOne({ email: body.email });
     if (isDuplicateEmail) throw new generalErrorHandler.InvalidCredentials('Email is already registered');
 
-    const user = new userCollection({
+    let user;
+    switch (body.role) {
+      case 'teacher':
+        user = await TeacherService.register(body);
+        break;
+    }
+
+    const allUsers = new userCollection({
+      _id: user._id,
       email: body.email,
       role: body.role
     });
 
-    user.password = await user.hashPassword(body.password);
+    allUsers.password = await allUsers.hashPassword(body.password);
 
-    let userCategory;
-    switch (body.role) {
-      case 'teacher':
-        userCategory = await TeacherService.register(body);
-        break;
-    }
-
-    await userCategory.save();
     await user.save();
+    await allUsers.save();
 
-    return userCategory;
+    return user;
   }
 
   async login(body) {
