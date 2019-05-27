@@ -1,7 +1,7 @@
 const generalErrorHandler = require('./error');
 
 const { userCollection } = require('./model');
-const { validateRegister, validateLogin } = require('./schema');
+const schema = require('./schema');
 
 // const { teacherCollection } = require('./teacher/model');
 const { TeacherService } = require('./teacher/service');
@@ -20,7 +20,7 @@ class UserService {
      * for faster login and register.
      */
 
-    const { error } = validateRegister(body);
+    const { error } = schema.register(body);
     if (error) throw new generalErrorHandler.ValidationError(error.details[0].message);
 
     const isDuplicateEmail = await userCollection.findOne({ email: body.email });
@@ -51,7 +51,7 @@ class UserService {
   }
 
   async login(body) {
-    const { error } = validateLogin(body);
+    const { error } = schema.login(body);
     if (error) throw new generalErrorHandler.ValidationError(error.details[0].message);
 
     // finding email address

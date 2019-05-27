@@ -3,13 +3,13 @@ const shortid = require('shortid');
 const generalErrorHandler = require('../error');
 const middleware = require('./middleware');
 const { teacherCollection } = require('./model');
-const { validateRegister, addAssistant } = require('./schema');
+const schema = require('./schema');
 
 const { assistantCollection } = require('../assistant/model');
 
 class TeacherService {
   static async register(body) {
-    const { error } = validateRegister(body);
+    const { error } = schema.register(body);
     if (error) throw new generalErrorHandler.ValidationError(error.details[0].message);
 
     const teacher = new teacherCollection({
@@ -28,7 +28,7 @@ class TeacherService {
     const teacherId = middleware.authorize(token);
 
     // assistant schema validation from teacher
-    const { error } = addAssistant(body);
+    const { error } = schema.addAssistant(body);
     if (error) throw new generalErrorHandler.ValidationError(error.details[0].message);
 
     // finding the teacher with that teacherId

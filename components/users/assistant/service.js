@@ -1,10 +1,10 @@
 const { assistantCollection } = require('./model');
-const { validateRegister } = require('./schema');
+const schema = require('./schema');
 const generalErrorHandler = require('../error');
 
 class AssistantService {
   static async register(body) {
-    const { error } = validateRegister(body);
+    const { error } = schema.register(body);
     if (error) throw new generalErrorHandler.ValidationError(error.details[0].message);
 
     const user = await assistantCollection.findById(body.code);

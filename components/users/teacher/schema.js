@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-function validateRegister(user) {
+function register(user) {
   const schema = {
     name: Joi.string()
       .min(4)
@@ -32,5 +32,5 @@ function addAssistant(user) {
   return Joi.validate(user, schema);
 }
 
-exports.validateRegister = validateRegister;
+exports.register = register;
 exports.addAssistant = addAssistant;

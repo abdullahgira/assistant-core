@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-function validateRegister(user) {
+function register(user) {
   const schema = {
     email: Joi.string()
       .email({ minDomainAtoms: 2 })
@@ -21,7 +21,7 @@ function validateRegister(user) {
   return Joi.validate(user, schema);
 }
 
-function validateLogin(req) {
+function login(req) {
   const schema = {
     email: Joi.string()
       .email({ minDomainAtoms: 2 })
@@ -34,5 +34,5 @@ function validateLogin(req) {
   return Joi.validate(req, schema);
 }
 
-exports.validateRegister = validateRegister;
-exports.validateLogin = validateLogin;
+exports.register = register;
+exports.login = login;
