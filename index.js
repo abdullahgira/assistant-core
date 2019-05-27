@@ -29,6 +29,7 @@ app.disable('x-powered-by');
 
 // routes
 app.use('/api/users', require('./components/users'));
+app.use('/api/groups', require('./components/groups'));
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
