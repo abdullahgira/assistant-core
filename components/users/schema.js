@@ -11,7 +11,11 @@ function validateRegister(user) {
     password: Joi.string()
       .min(8)
       .max(255)
-      .required()
+      .required(),
+    // for teacher, assistant and student register
+    name: Joi.string(),
+    phone: Joi.string(),
+    subject: Joi.string()
   };
   return Joi.validate(user, schema);
 }
@@ -19,12 +23,12 @@ function validateRegister(user) {
 function validateLogin(req) {
   const schema = {
     email: Joi.string()
-    .email({ minDomainAtoms: 2 })
-    .required(),
+      .email({ minDomainAtoms: 2 })
+      .required(),
     password: Joi.string()
-    .min(6)
-    .max(255)
-    .required()
+      .min(6)
+      .max(255)
+      .required()
   };
   return Joi.validate(req, schema);
 }

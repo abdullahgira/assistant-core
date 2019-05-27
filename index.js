@@ -17,10 +17,7 @@ mongoose
   .catch(err => winston.error('Could not connect to MongoDB...', err));
 
 const logger = winston.createLogger({
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: './logs/info.log' })
-  ]
+  transports: [new winston.transports.Console(), new winston.transports.File({ filename: './logs/info.log' })]
 });
 
 app.use(helmet());
@@ -29,6 +26,9 @@ app.use(bodyParser.json());
 
 app.disable('etag');
 app.disable('x-powered-by');
+
+// routes
+app.use('/api/users', require('./components/users'));
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
