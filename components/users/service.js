@@ -5,6 +5,7 @@ const { validateRegister, validateLogin } = require('./schema');
 
 // const { teacherCollection } = require('./teacher/model');
 const { TeacherService } = require('./teacher/service');
+const { AssistantService } = require('./assistant/service');
 
 class UserService {
   async register(body) {
@@ -29,6 +30,9 @@ class UserService {
     switch (body.role) {
       case 'teacher':
         user = await TeacherService.register(body);
+        break;
+      case 'assistant':
+        user = await AssistantService.register(body);
         break;
     }
 

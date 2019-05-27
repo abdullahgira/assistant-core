@@ -15,7 +15,8 @@ function validateRegister(user) {
     // for teacher, assistant and student register
     name: Joi.string(),
     phone: Joi.string(),
-    subject: Joi.string()
+    subject: Joi.string(),
+    code: Joi.string()
   };
   return Joi.validate(user, schema);
 }
