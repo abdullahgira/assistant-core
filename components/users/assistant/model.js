@@ -21,7 +21,8 @@ const assistantSchema = new Schema({
   date: {
     type: Date,
     default: Date.now
-  }
+  },
+  recentlyVerified: Date
 });
 
 exports.assistantCollection = mongoose.model('Assistant', assistantSchema);
