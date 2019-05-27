@@ -4,6 +4,9 @@ const router = express.Router();
 const { UserService } = require('./service');
 const userService = new UserService();
 
+// user components
+router.use('/teacher', require('./teacher'));
+
 router.post('/register', registerHandler);
 router.post('/login', loginHandler);
 
