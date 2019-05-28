@@ -80,6 +80,36 @@ class GroupService {
 
     return { code };
   }
+
+  async removeStudent(body, token, groupId, studentId) {
+    // TODO: Access student db when implemented and remove that teacher
+    const assistantId = assistantMiddleware.authorize(token);
+
+    // finding the assistant with the assistantId
+    const assistant = await assistantCollection.findById(assistantId);
+    if (!assistant) throw new generalUserErrorHandler.InvalidToken();
+
+    // accessing teacher db
+    const teacher = await teacherCollection.findById(assistant.teacher);
+
+    // accessing group db
+    const group = await groupCollection.findById(groupId);
+    if (!group) throw new errorHandler.InvalidGroupId();
+
+    const studentTeacher = await studentTeacherCollection.findById(studentId);
+    if (!studentTeacher) throw new generalUserErrorHandler.InvalidUserId();
+
+    teacher.students.number--;
+    teacher.students.details = teacher.students.details.filter(s => s._id !== studentId);
+
+    group.students.number--;
+    group.students.details = group.students.details.filter(s => s._id !== studentId);
+
+    await studentTeacherCollection.deleteOne({ _id: studentId });
+    await group.save();
+    await teacher.save();
+    return { status: 200 }; // success message
+  }
 }
 
 exports.GroupService = GroupService;
