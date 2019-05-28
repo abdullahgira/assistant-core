@@ -6,6 +6,14 @@ class GroupCreationError extends Error {
   }
 }
 
+class DoublicateEntry extends Error {
+  constructor(message = 'This name is already added.') {
+    super(message);
+    this.name = 'DoublicateEntry';
+    this.statusCode = 400;
+  }
+}
+
 class InvalidGroupId extends Error {
   constructor(message = 'Invalid group id was provided') {
     super(message);
@@ -16,3 +24,4 @@ class InvalidGroupId extends Error {
 
 exports.GroupCreationError = GroupCreationError;
 exports.InvalidGroupId = InvalidGroupId;
+exports.DoublicateEntry = DoublicateEntry;

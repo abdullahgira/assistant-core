@@ -22,11 +22,16 @@ class GroupService {
     const { error } = schema.createGroup(body);
     if (error) throw new errorHandler.GroupCreationError(error.details[0].message);
 
+    // accessing the teacher to check for double names
+    const teacher = await teacherCollection.findById(assistant.teacher);
+
+    const isDuplicateName = teacher.groups.details.filter(g => g.name === body.name.trim());
+    if (isDuplicateName) throw new errorHandler.DoublicateEntry();
+
     const group = new groupCollection({
-      name: body.name
+      name: body.name.trim()
     });
 
-    const teacher = await teacherCollection.findById(assistant.teacher);
     teacher.groups.number++;
     teacher.groups.details.push({ _id: group._id, name: body.name });
 
