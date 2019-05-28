@@ -33,7 +33,7 @@ class TeacherService {
 
     // finding the teacher with that teacherId
     const teacher = await teacherCollection.findById(teacherId);
-    if (!teacher) throw new generalErrorHandler.ValidationError();
+    if (!teacher) throw new generalErrorHandler.InvalidToken();
 
     const code = shortid.generate();
     const assistant = new assistantCollection({

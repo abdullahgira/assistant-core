@@ -1,15 +1,17 @@
+const shortid = require('shortid');
+
 const schema = require('./schema');
+const errorHandler = require('./error');
 const { groupCollection } = require('./model');
+
 const { teacherCollection } = require('../users/teacher/model');
 const { assistantCollection } = require('../users/assistant/model');
+const { studentTeacherCollection } = require('../users/studentTeacher.model');
 const assistantMiddleware = require('../users/assistant/middleware');
 const generalUserErrorHandler = require('../users/error');
 
-const errorHandler = require('./error');
-
 class GroupService {
   async createGroup(body, token) {
-    if (!token) throw new generalUserErrorHandler.NoTokenProvided();
     const assistantId = assistantMiddleware.authorize(token);
 
     // finding the assistant with the assistantId
@@ -32,6 +34,46 @@ class GroupService {
     await teacher.save();
 
     return group;
+  }
+
+  async addStudent(body, token, groupId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    console.log(groupId);
+    // finding the assistant with the assistantId
+    const assistant = await assistantCollection.findById(assistantId);
+    if (!assistant) throw new generalUserErrorHandler.InvalidToken();
+
+    // accessing teacher db
+    const teacher = await teacherCollection.findById(assistant.teacher);
+
+    // accessing group db
+    const group = await groupCollection.findById(groupId);
+    if (!group) throw new errorHandler.InvalidGroupId();
+
+    // validate body schema
+    const { error } = schema.addStudent(body);
+    if (error) throw new errorHandler.GroupCreationError(error.details[0].message);
+
+    const code = shortid.generate();
+    const studentTeacher = new studentTeacherCollection({
+      _id: code,
+      name: body.name,
+      phone: body.phone
+    });
+
+    // adding the new student to the teacher db
+    teacher.students.number++;
+    teacher.students.details.push({ _id: code, name: body.name });
+
+    // adding the new student to the group db
+    group.students.number++;
+    group.students.details.push({ _id: code, name: body.name });
+
+    await group.save();
+    await teacher.save();
+    await studentTeacher.save();
+
+    return { code };
   }
 }
 

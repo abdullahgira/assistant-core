@@ -6,4 +6,13 @@ class GroupCreationError extends Error {
   }
 }
 
+class InvalidGroupId extends Error {
+  constructor(message = 'Invalid group id was provided') {
+    super(message);
+    this.name = 'InvalidGroupId';
+    this.statusCode = 406;
+  }
+}
+
 exports.GroupCreationError = GroupCreationError;
+exports.InvalidGroupId = InvalidGroupId;
