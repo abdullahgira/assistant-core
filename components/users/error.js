@@ -30,6 +30,14 @@ class InvalidToken extends Error {
   }
 }
 
+class InvalidUserId extends Error {
+  constructor(message = 'Invalid id was provided') {
+    super(message);
+    this.name = 'InvalidUserId';
+    this.statusCode = 400;
+  }
+}
+
 class Forbidden extends Error {
   constructor(message = 'An un authorized action occured') {
     super(message);
@@ -41,5 +49,6 @@ class Forbidden extends Error {
 exports.ValidationError = ValidationError;
 exports.InvalidCredentials = InvalidCredentials;
 exports.InvalidToken = InvalidToken;
+exports.InvalidUserId = InvalidUserId;
 exports.NoTokenProvided = NoTokenProvided;
 exports.Forbidden = Forbidden;
