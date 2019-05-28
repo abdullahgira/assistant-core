@@ -5,7 +5,7 @@ const studentTeacherSchema = new Schema({
   _id: String,
   teacherId: String,
   groupId: String,
-  studentId: String,
+  studentId: { type: String, default: '' },
   name: {
     type: String,
     required: true,
@@ -19,15 +19,19 @@ const studentTeacherSchema = new Schema({
   },
   attendance: {
     number: { type: Number, default: 0 },
-    details: [Date]
+    details: [String]
+  },
+  absence: {
+    number: { type: Number, default: 0 },
+    details: [String]
   },
   attendancePayment: {
     number: { type: Number, default: 0 },
-    details: [Date]
+    details: [String]
   },
   booksPayment: {
     number: { type: Number, default: 0 },
-    details: [Date]
+    details: [String]
   }
 });
 
