@@ -25,7 +25,7 @@ class GroupService {
     // accessing the teacher to check for double names
     const teacher = await teacherCollection.findById(assistant.teacher);
 
-    const isDuplicateName = teacher.groups.details.filter(g => g.name === body.name.trim());
+    const isDuplicateName = teacher.groups.details.find(g => g.name === body.name.trim());
     if (isDuplicateName) throw new errorHandler.DoublicateEntry();
 
     const group = new groupCollection({
@@ -43,7 +43,7 @@ class GroupService {
 
   async addStudent(body, token, groupId) {
     const assistantId = assistantMiddleware.authorize(token);
-    console.log(groupId);
+
     // finding the assistant with the assistantId
     const assistant = await assistantCollection.findById(assistantId);
     if (!assistant) throw new generalUserErrorHandler.InvalidToken();

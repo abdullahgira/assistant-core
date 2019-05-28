@@ -3,6 +3,9 @@ const { Schema } = mongoose;
 
 const studentTeacherSchema = new Schema({
   _id: String,
+  teacherId: String,
+  groupId: String,
+  studentId: String,
   name: {
     type: String,
     required: true,
