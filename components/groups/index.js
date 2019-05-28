@@ -9,6 +9,8 @@ router.post('/create_group', createGroupHandler);
 router.post('/group_:id/add_student', addStudentHandler);
 router.delete('/group_:groupId/students/student_:studentId', removeStudentHandler);
 
+router.get('/group_:groupId/set_new_attendance_record', setNewAttendanceHandler);
+
 async function createGroupHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const group = await groupService.createGroup(req.body, token);
@@ -30,6 +32,12 @@ async function removeStudentHandler(req, res) {
     req.params.studentId
   );
   res.json(statusCode);
+}
+
+async function setNewAttendanceHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const message = await groupService.setNewAttendanceCheck(token, req.params.groupId);
+  res.json(message);
 }
 
 module.exports = router;

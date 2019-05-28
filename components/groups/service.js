@@ -112,6 +112,20 @@ class GroupService {
     await teacher.save();
     return { status: 200 }; // success message
   }
+
+  async setNewAttendanceCheck(token, groupId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const students = await studentTeacherCollection.find({ groupId: groupId });
+
+    const nowDate = new Date(Date.now()).toLocaleString();
+    students.forEach(async s => {
+      s.absence.number++;
+      s.absence.details.unshift(nowDate);
+      await s.save();
+    });
+
+    return { message: 'Success' };
+  }
 }
 
 exports.GroupService = GroupService;
