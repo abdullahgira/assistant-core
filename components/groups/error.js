@@ -22,6 +22,15 @@ class InvalidGroupId extends Error {
   }
 }
 
+class Forbidden extends Error {
+  constructor(message = 'Forbidden access to a group that doesn\'t relate to the teacher.') {
+    super(message);
+    this.name = 'InvalidGroupId';
+    this.statusCode = 406;
+  }
+}
+
 exports.GroupCreationError = GroupCreationError;
 exports.InvalidGroupId = InvalidGroupId;
 exports.DoublicateEntry = DoublicateEntry;
+exports.Forbidden = Forbidden;
