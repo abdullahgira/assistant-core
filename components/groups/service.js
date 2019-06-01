@@ -134,6 +134,7 @@ class GroupService {
     if (!group) throw new errorHandler.InvalidGroupId();
 
     const assistant = await assistantCollection.findById(assistantId);
+    if (!assistant) throw new generalUserErrorHandler.InvalidToken();
 
     if (assistant.teacherId !== group.teacherId) throw new errorHandler.Forbidden();
 
@@ -186,6 +187,7 @@ class GroupService {
     if (!group) throw new errorHandler.InvalidGroupId();
 
     const assistant = await assistantCollection.findById(assistantId);
+    if (!assistant) throw new generalUserErrorHandler.InvalidToken();
 
     if (assistant.teacherId !== group.teacherId) throw new errorHandler.Forbidden();
 
