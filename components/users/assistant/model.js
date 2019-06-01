@@ -17,7 +17,7 @@ const assistantSchema = new Schema({
     type: String,
     default: ''
   },
-  teacher: String,
+  teacherId: String,
   date: {
     type: Date,
     default: Date.now
