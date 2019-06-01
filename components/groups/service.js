@@ -23,7 +23,7 @@ class GroupService {
     if (error) throw new errorHandler.GroupCreationError(error.details[0].message);
 
     // accessing the teacher to check for double names
-    const teacher = await teacherCollection.findById(assistant.teacher);
+    const teacher = await teacherCollection.findById(assistant.teacherId);
 
     const isDuplicateName = teacher.groups.details.find(g => g.name === body.name.trim());
     if (isDuplicateName) throw new errorHandler.DoublicateEntry();
@@ -49,7 +49,7 @@ class GroupService {
     if (!assistant) throw new generalUserErrorHandler.InvalidToken();
 
     // accessing teacher db
-    const teacher = await teacherCollection.findById(assistant.teacher);
+    const teacher = await teacherCollection.findById(assistant.teacherId);
 
     // accessing group db
     const group = await groupCollection.findById(groupId);
