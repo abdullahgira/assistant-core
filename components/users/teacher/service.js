@@ -39,7 +39,7 @@ class TeacherService {
     const assistant = new assistantCollection({
       _id: code,
       name: body.name,
-      teacher: teacherId
+      teacherId
     });
 
     teacher.assistants.number++;
