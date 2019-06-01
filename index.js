@@ -14,12 +14,8 @@ const app = express();
 
 mongoose
   .connect('mongodb://localhost:27017/assistant-core', { useNewUrlParser: true })
-  .then(() => logger.info('Connected to MongoDB...'))
+  .then(() => winston.info('Connected to MongoDB...'))
   .catch(err => winston.error('Could not connect to MongoDB...', err));
-
-const logger = winston.createLogger({
-  transports: [new winston.transports.Console(), new winston.transports.File({ filename: './logs/info.log' })]
-});
 
 app.use(helmet());
 app.use(compression());
@@ -35,8 +31,12 @@ app.use('/api/groups', require('./components/groups'));
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  winston.error(`${err.statusCode || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
   res.status(err.statusCode || 500).json({ error: err.message });
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => logger.info(`Listining on port ${PORT}`));
+app.listen(PORT, () => winston.info(`Listining on port ${PORT}`));
