@@ -115,6 +115,19 @@ class GroupService {
   }
 
   async setNewAttendanceRecord(token, groupId) {
+    /**
+     * @param token -> json web token
+     * @param groupId -> the group id that will have a new attendance record
+     *
+     * New attendance records are saved to the Group table with a unique id, teacher id
+     * and the current date.
+     *
+     * New attendace is recorded for each student by incrementing his absence, adding the current
+     * date to his absence details and resetting hasRecordedAttendance property,
+     * if the student came from anoter group, we only set attendedFromAnotherGroup to false
+     * and do nothing else.
+     *
+     */
     const assistantId = assistantMiddleware.authorize(token);
     const group = await groupCollection.findById(groupId);
 
