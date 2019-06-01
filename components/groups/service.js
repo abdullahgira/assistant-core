@@ -151,6 +151,22 @@ class GroupService {
   }
 
   async recordAttendance(token, groupId, studentId) {
+    /**
+     * @param token -> json web token
+     * @param groupId -> the group id at wich the attendance will be recorded
+     * @param studentId -> the id of the student that will record attendance
+     *
+     * It checks if the student is from the same group, if the student is from another group,
+     * it sets attendedFromAnotherGroup to true, and doesn't delete the latest recorded absence,
+     * because his absence was not recorded with this group.
+     *
+     * If the student is from the same group, the latest absence is removed.
+     *
+     * For both students, a new attendance record is added to them and a hasRecordedAttendance
+     * property is set to true to prevent more than one attendance record for the same student,
+     * this property is reset when a new attendance record is requested.
+     *
+     */
     const assistantId = assistantMiddleware.authorize(token);
     const group = await groupCollection.findById(groupId);
 
