@@ -142,6 +142,32 @@ class GroupService {
 
     return { _id: attendanceId, date: nowDate };
   }
+
+  async recordAttendance(token, groupId, studentId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const group = await groupCollection.findById(groupId);
+
+    if (!group) throw new errorHandler.InvalidGroupId();
+
+    const assistant = await assistantCollection.findById(assistantId);
+
+    if (assistant.teacherId !== group.teacherId) throw new errorHandler.Forbidden();
+
+    const student = await studentTeacherCollection.findById(studentId);
+    const attendanceDate = group.attendance_record.details[0].date;
+
+    if (student.groupId !== groupId) {
+      student.attendance.attended_from_another_group = true;
+    } else {
+      student.absence.number--;
+    }
+
+    student.attendance.number++;
+    student.attendance.details.unshift(attendanceDate);
+
+    await student.save();
+    return { message: 'Success' };
+  }
 }
 
 exports.GroupService = GroupService;
