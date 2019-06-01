@@ -29,7 +29,8 @@ class GroupService {
     if (isDuplicateName) throw new errorHandler.DoublicateEntry();
 
     const group = new groupCollection({
-      name: body.name.trim()
+      name: body.name.trim(),
+      teacherId: teacher._id
     });
 
     teacher.groups.number++;
