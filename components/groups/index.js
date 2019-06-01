@@ -37,7 +37,7 @@ async function removeStudentHandler(req, res) {
 
 async function setNewAttendanceHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const message = await groupService.setNewAttendanceCheck(token, req.params.groupId);
+  const message = await groupService.setNewAttendanceRecord(token, req.params.groupId);
   res.json(message);
 }
 

@@ -114,7 +114,7 @@ class GroupService {
     return { status: 200 }; // success message
   }
 
-  async setNewAttendanceCheck(token, groupId) {
+  async setNewAttendanceRecord(token, groupId) {
     const assistantId = assistantMiddleware.authorize(token);
     const group = await groupCollection.findById(groupId);
 
