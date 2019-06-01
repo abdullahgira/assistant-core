@@ -30,7 +30,16 @@ class Forbidden extends Error {
   }
 }
 
+class StudentHasRecordedAttendance extends Error {
+  constructor(message = 'The student has already been recorded in the attendance.') {
+    super(message);
+    this.name = 'StudentMaxAttedanceRecorded';
+    this.statusCode = 405;
+  }
+}
+
 exports.GroupCreationError = GroupCreationError;
 exports.InvalidGroupId = InvalidGroupId;
 exports.DoublicateEntry = DoublicateEntry;
 exports.Forbidden = Forbidden;
+exports.StudentHasRecordedAttendance = StudentHasRecordedAttendance;
