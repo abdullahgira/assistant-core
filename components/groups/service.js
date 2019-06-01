@@ -115,16 +115,32 @@ class GroupService {
 
   async setNewAttendanceCheck(token, groupId) {
     const assistantId = assistantMiddleware.authorize(token);
-    const students = await studentTeacherCollection.find({ groupId: groupId });
+    const group = await groupCollection.findById(groupId);
 
+    if (!group) throw new errorHandler.InvalidGroupId();
+
+    const assistant = await assistantCollection.findById(assistantId);
+
+    if (assistant.teacherId !== group.teacherId) throw new errorHandler.Forbidden();
+
+    const students = await studentTeacherCollection.find({ groupId: groupId });
     const nowDate = new Date(Date.now()).toLocaleString();
+    const attendanceId = shortid.generate();
+
+    group.attendance_record.number++;
+    group.attendance_record.details.push({
+      _id: attendanceId,
+      teacherId: assistant.teacherId,
+      date: nowDate
+    });
+
     students.forEach(async s => {
       s.absence.number++;
       s.absence.details.unshift(nowDate);
       await s.save();
     });
 
-    return { message: 'Success' };
+    return { _id: attendanceId, date: nowDate };
   }
 }
 
