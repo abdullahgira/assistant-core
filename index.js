@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const winston = require('winston');
+const winston = require('./config/winston');
+const morgan = require('morgan');
 const helmet = require('helmet');
 const compression = require('compression');
 
@@ -22,6 +23,7 @@ const logger = winston.createLogger({
 
 app.use(helmet());
 app.use(compression());
+app.use(morgan('combined', { stream: winston.stream }));
 app.use(bodyParser.json());
 
 app.disable('etag');
