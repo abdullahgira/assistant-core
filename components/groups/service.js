@@ -141,6 +141,7 @@ class GroupService {
       } else {
         s.absence.number++;
         s.absence.details.unshift(nowDate);
+        s.attendance.hasRecordedAttendance = false;
       }
       await s.save();
     });
@@ -164,6 +165,8 @@ class GroupService {
 
     if (student.groupId !== groupId) {
       student.attendance.attendedFromAnotherGroup = true;
+    } else if (student.attendance.hasRecordedAttendance) {
+      throw new errorHandler.StudentHasRecordedAttendance();
     } else {
       student.absence.number--;
       student.absence.details.shift();
@@ -171,6 +174,7 @@ class GroupService {
 
     student.attendance.number++;
     student.attendance.details.unshift(attendanceDate);
+    student.attendance.hasRecordedAttendance = true;
 
     await student.save();
     return { message: 'Success' };
