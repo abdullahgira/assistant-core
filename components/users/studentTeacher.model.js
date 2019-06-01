@@ -19,7 +19,7 @@ const studentTeacherSchema = new Schema({
   },
   attendance: {
     number: { type: Number, default: 0 },
-    attended_from_another_group: Boolean,
+    attendedFromAnotherGroup: Boolean,
     details: [String]
   },
   absence: {

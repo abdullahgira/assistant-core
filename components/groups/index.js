@@ -10,6 +10,7 @@ router.post('/group_:id/add_student', addStudentHandler);
 router.delete('/group_:groupId/students/student_:studentId', removeStudentHandler);
 
 router.get('/group_:groupId/set_new_attendance_record', setNewAttendanceHandler);
+router.get('/group_:groupId/record_attendance/student_:studentId', recordAttendanceHandler);
 
 async function createGroupHandler(req, res) {
   const token = req.headers['x-auth-token'];
@@ -37,6 +38,12 @@ async function removeStudentHandler(req, res) {
 async function setNewAttendanceHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const message = await groupService.setNewAttendanceCheck(token, req.params.groupId);
+  res.json(message);
+}
+
+async function recordAttendanceHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const message = await groupService.recordAttendance(token, req.params.groupId, req.params.studentId);
   res.json(message);
 }
 

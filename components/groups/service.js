@@ -129,18 +129,23 @@ class GroupService {
     const attendanceId = shortid.generate();
 
     group.attendance_record.number++;
-    group.attendance_record.details.push({
+    group.attendance_record.details.unshift({
       _id: attendanceId,
       teacherId: assistant.teacherId,
       date: nowDate
     });
 
     students.forEach(async s => {
-      s.absence.number++;
-      s.absence.details.unshift(nowDate);
+      if (s.attendance.attendedFromAnotherGroup) {
+        s.attendance.attendedFromAnotherGroup = false;
+      } else {
+        s.absence.number++;
+        s.absence.details.unshift(nowDate);
+      }
       await s.save();
     });
 
+    await group.save();
     return { _id: attendanceId, date: nowDate };
   }
 
@@ -158,9 +163,10 @@ class GroupService {
     const attendanceDate = group.attendance_record.details[0].date;
 
     if (student.groupId !== groupId) {
-      student.attendance.attended_from_another_group = true;
+      student.attendance.attendedFromAnotherGroup = true;
     } else {
       student.absence.number--;
+      student.absence.details.shift();
     }
 
     student.attendance.number++;
