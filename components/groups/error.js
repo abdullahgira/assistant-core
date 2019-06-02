@@ -38,8 +38,17 @@ class StudentHasRecordedAttendance extends Error {
   }
 }
 
+class ReachedMaxReversePayValue extends Error {
+  constructor(message = 'Maximum return value has been reached') {
+    super(message);
+    this.name = 'ReachedMaxReversePayValue';
+    this.statusCode = 405;
+  }
+}
+
 exports.GroupCreationError = GroupCreationError;
 exports.InvalidGroupId = InvalidGroupId;
 exports.DoublicateEntry = DoublicateEntry;
 exports.Forbidden = Forbidden;
 exports.StudentHasRecordedAttendance = StudentHasRecordedAttendance;
+exports.ReachedMaxReversePayValue = ReachedMaxReversePayValue;
