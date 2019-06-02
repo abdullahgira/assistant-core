@@ -2,6 +2,7 @@ const shortid = require('shortid');
 
 const schema = require('./schema');
 const errorHandler = require('./error');
+const validator = require('./validator');
 const { groupCollection } = require('./model');
 
 const { teacherCollection } = require('../users/teacher/model');
@@ -13,10 +14,7 @@ const generalUserErrorHandler = require('../users/error');
 class GroupService {
   async createGroup(body, token) {
     const assistantId = assistantMiddleware.authorize(token);
-
-    // finding the assistant with the assistantId
-    const assistant = await assistantCollection.findById(assistantId);
-    if (!assistant) throw new generalUserErrorHandler.InvalidToken();
+    const assistant = await validator.validateAssistantExistence(assistantId);
 
     // validate body schema
     const { error } = schema.createGroup(body);
@@ -44,17 +42,12 @@ class GroupService {
 
   async addStudent(body, token, groupId) {
     const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+    const group = await validator.validateGroupExistence(groupId);
 
-    // finding the assistant with the assistantId
-    const assistant = await assistantCollection.findById(assistantId);
-    if (!assistant) throw new generalUserErrorHandler.InvalidToken();
+    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
-    // accessing teacher db
     const teacher = await teacherCollection.findById(assistant.teacherId);
-
-    // accessing group db
-    const group = await groupCollection.findById(groupId);
-    if (!group) throw new errorHandler.InvalidGroupId();
 
     // validate body schema
     const { error } = schema.addStudent(body);
@@ -87,21 +80,13 @@ class GroupService {
   async removeStudent(body, token, groupId, studentId) {
     // TODO: Access student db when implemented and remove that teacher
     const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+    const group = await validator.validateGroupExistence();
 
-    // finding the assistant with the assistantId
-    const assistant = await assistantCollection.findById(assistantId);
-    if (!assistant) throw new generalUserErrorHandler.InvalidToken();
+    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
+    await validator.validateStudentExistence(studentId);
 
-    // accessing teacher db
     const teacher = await teacherCollection.findById(assistant.teacher);
-
-    // accessing group db
-    const group = await groupCollection.findById(groupId);
-    if (!group) throw new errorHandler.InvalidGroupId();
-
-    const studentTeacher = await studentTeacherCollection.findById(studentId);
-    if (!studentTeacher) throw new generalUserErrorHandler.InvalidUserId();
-
     teacher.students.number--;
     teacher.students.details = teacher.students.details.filter(s => s._id !== studentId);
 
@@ -129,14 +114,10 @@ class GroupService {
      *
      */
     const assistantId = assistantMiddleware.authorize(token);
-    const group = await groupCollection.findById(groupId);
+    const group = await validator.validateGroupExistence(groupId);
+    const assistant = await validator.validateAssistantExistence(assistantId);
 
-    if (!group) throw new errorHandler.InvalidGroupId();
-
-    const assistant = await assistantCollection.findById(assistantId);
-    if (!assistant) throw new generalUserErrorHandler.InvalidToken();
-
-    if (assistant.teacherId !== group.teacherId) throw new errorHandler.Forbidden();
+    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
     const students = await studentTeacherCollection.find({ groupId: groupId });
     const nowDate = new Date(Date.now()).toLocaleString();
@@ -182,16 +163,12 @@ class GroupService {
      *
      */
     const assistantId = assistantMiddleware.authorize(token);
-    const group = await groupCollection.findById(groupId);
-
-    if (!group) throw new errorHandler.InvalidGroupId();
-
-    const assistant = await assistantCollection.findById(assistantId);
-    if (!assistant) throw new generalUserErrorHandler.InvalidToken();
+    const assistant = await validator.validateAssistantExistence(assistantId);
+    const group = await validator.validateGroupExistence(groupId);
 
     if (assistant.teacherId !== group.teacherId) throw new errorHandler.Forbidden();
 
-    const student = await studentTeacherCollection.findById(studentId);
+    const student = await validator.validateStudentExistence(studentId);
     const attendanceDate = group.attendance_record.details[0].date;
 
     if (student.groupId !== groupId) {
@@ -213,17 +190,12 @@ class GroupService {
 
   async payAttendance(token, groupId, studentId) {
     const assistantId = assistantMiddleware.authorize(token);
-    const group = await groupCollection.findById(groupId);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+    const group = await validator.validateGroupExistence(groupId);
 
-    if (!group) throw new errorHandler.InvalidGroupId();
+    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
-    const assistant = await assistantCollection.findById(assistantId);
-    if (!assistant) throw new generalUserErrorHandler.InvalidToken();
-
-    if (assistant.teacherId !== group.teacherId) throw new errorHandler.Forbidden();
-
-    const student = await studentTeacherCollection.findById(studentId);
-    if (!student) throw new generalUserErrorHandler.InvalidUserId();
+    const student = await validator.validateStudentExistence(studentId);
 
     student.attendancePayment.number++;
     student.attendancePayment.details.unshift(group.attendance_record.details[0].date);
