@@ -210,6 +210,27 @@ class GroupService {
     await student.save();
     return { message: 'Success' };
   }
+
+  async payAttendance(token, groupId, studentId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const group = await groupCollection.findById(groupId);
+
+    if (!group) throw new errorHandler.InvalidGroupId();
+
+    const assistant = await assistantCollection.findById(assistantId);
+    if (!assistant) throw new generalUserErrorHandler.InvalidToken();
+
+    if (assistant.teacherId !== group.teacherId) throw new errorHandler.Forbidden();
+
+    const student = await studentTeacherCollection.findById(studentId);
+    if (!student) throw new generalUserErrorHandler.InvalidUserId();
+
+    student.attendancePayment.number++;
+    student.attendancePayment.details.unshift(group.attendance_record.details[0].date);
+
+    await student.save();
+    return { student };
+  }
 }
 
 exports.GroupService = GroupService;
