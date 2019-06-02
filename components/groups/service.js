@@ -81,12 +81,12 @@ class GroupService {
     // TODO: Access student db when implemented and remove that teacher
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
-    const group = await validator.validateGroupExistence();
+    const group = await validator.validateGroupExistence(groupId);
 
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
     await validator.validateStudentExistence(studentId);
 
-    const teacher = await teacherCollection.findById(assistant.teacher);
+    const teacher = await teacherCollection.findById(assistant.teacherId);
     teacher.students.number--;
     teacher.students.details = teacher.students.details.filter(s => s._id !== studentId);
 
@@ -114,8 +114,8 @@ class GroupService {
      *
      */
     const assistantId = assistantMiddleware.authorize(token);
-    const group = await validator.validateGroupExistence(groupId);
     const assistant = await validator.validateAssistantExistence(assistantId);
+    const group = await validator.validateGroupExistence(groupId);
 
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
