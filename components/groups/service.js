@@ -270,6 +270,14 @@ class GroupService {
     await student.save();
     return { student };
   }
+
+  async getStudentDetails(token, studentId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    await validator.validateAssistantExistence(assistantId);
+
+    const student = await validator.validateStudentExistence(studentId);
+    return { student };
+  }
 }
 
 exports.GroupService = GroupService;
