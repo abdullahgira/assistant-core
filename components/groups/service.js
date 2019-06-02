@@ -54,7 +54,7 @@ class GroupService {
     const code = shortid.generate();
     const studentTeacher = new studentTeacherCollection({
       _id: code,
-      techerId: teacher._id,
+      teacherId: teacher._id,
       groupId: groupId,
       name: body.name,
       phone: body.phone
