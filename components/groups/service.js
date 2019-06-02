@@ -187,6 +187,16 @@ class GroupService {
   }
 
   async payAttendance(token, groupId, studentId) {
+    /**
+     * @param token -> json web token
+     * @param groupId -> the group id at wich the attendance will be recorded
+     * @param studentId -> the id of the student that will record attendance
+     *
+     * Increments attendancePyament number for student and add the current date
+     * to the details of the payment, this method can be called as many times as needed
+     * and should be reversed by reversePayAttendance.
+     *
+     */
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
     const group = await validator.validateGroupExistence(groupId);
