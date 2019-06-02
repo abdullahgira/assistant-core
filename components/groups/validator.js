@@ -26,3 +26,7 @@ exports.validateStudentExistence = async studentId => {
 exports.validateGroupCanBeModifiedByAssistant = (group, assistant) => {
   if (group.teacherId !== assistant.teacherId) throw new errorHandler.Forbidden();
 };
+
+exports.validateStudentCanBeModifiedByAssistant = (student, assistant) => {
+  if (student.teacherId !== assistant.teacherId) throw new errorHandler.Forbidden();
+};

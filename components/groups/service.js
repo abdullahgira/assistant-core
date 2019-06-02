@@ -162,11 +162,13 @@ class GroupService {
      */
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
-    const group = await validator.validateGroupExistence(groupId);
 
-    if (assistant.teacherId !== group.teacherId) throw new errorHandler.Forbidden();
+    const group = await validator.validateGroupExistence(groupId);
+    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
     const student = await validator.validateStudentExistence(studentId);
+    validator.validateStudentCanBeModifiedByAssistant(student, assistant);
+
     const attendanceDate = group.attendance_record.details[0].date;
 
     if (student.groupId !== groupId) {
@@ -199,11 +201,12 @@ class GroupService {
      */
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
-    const group = await validator.validateGroupExistence(groupId);
 
+    const group = await validator.validateGroupExistence(groupId);
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
     const student = await validator.validateStudentExistence(studentId);
+    validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
     student.attendancePayment.number++;
     student.attendancePayment.details.unshift(group.attendance_record.details[0].date);
@@ -225,11 +228,13 @@ class GroupService {
      */
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
-    const group = await validator.validateGroupExistence(groupId);
 
+    const group = await validator.validateGroupExistence(groupId);
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
     const student = await validator.validateStudentExistence(studentId);
+    validator.validateStudentCanBeModifiedByAssistant(student, assistant);
+
     if (student.attendancePayment.number === 0) throw new errorHandler.ReachedMaxReversePayValue();
 
     student.attendancePayment.number--;
@@ -242,11 +247,13 @@ class GroupService {
   async payBooks(token, groupId, studentId) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
-    const group = await validator.validateGroupExistence(groupId);
 
+    const group = await validator.validateGroupExistence(groupId);
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
     const student = await validator.validateStudentExistence(studentId);
+    validator.validateStudentCanBeModifiedByAssistant(student, assistant);
+
     student.booksPayment.number++;
     student.booksPayment.details.unshift(new Date(Date.now()).toLocaleString());
 
@@ -257,11 +264,13 @@ class GroupService {
   async reversePayBooks(token, groupId, studentId) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
-    const group = await validator.validateGroupExistence(groupId);
 
+    const group = await validator.validateGroupExistence(groupId);
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
     const student = await validator.validateStudentExistence(studentId);
+    validator.validateStudentCanBeModifiedByAssistant(student, assistant);
+
     if (student.booksPayment.number === 0) throw new errorHandler.ReachedMaxReversePayValue();
 
     student.booksPayment.number--;
@@ -273,9 +282,11 @@ class GroupService {
 
   async getStudentDetails(token, studentId) {
     const assistantId = assistantMiddleware.authorize(token);
-    await validator.validateAssistantExistence(assistantId);
+    const assistant = await validator.validateAssistantExistence(assistantId);
 
     const student = await validator.validateStudentExistence(studentId);
+    validator.validateStudentCanBeModifiedByAssistant(student, assistant);
+
     return { student };
   }
 }
