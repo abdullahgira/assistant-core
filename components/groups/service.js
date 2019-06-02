@@ -6,10 +6,8 @@ const validator = require('./validator');
 const { groupCollection } = require('./model');
 
 const { teacherCollection } = require('../users/teacher/model');
-const { assistantCollection } = require('../users/assistant/model');
 const { studentTeacherCollection } = require('../users/studentTeacher.model');
 const assistantMiddleware = require('../users/assistant/middleware');
-const generalUserErrorHandler = require('../users/error');
 
 class GroupService {
   async createGroup(body, token) {
