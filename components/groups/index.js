@@ -11,7 +11,9 @@ router.delete('/group_:groupId/students/student_:studentId', removeStudentHandle
 
 router.get('/group_:groupId/set_new_attendance_record', setNewAttendanceHandler);
 router.get('/group_:groupId/record_attendance/student_:studentId', recordAttendanceHandler);
+
 router.get('/group_:groupId/pay_attendance/student_:studentId', payAttendanceHandler);
+router.get('/group_:groupId/reverse_pay_attendance/student_:studentId', reversePayAttendanceHandler);
 
 async function createGroupHandler(req, res) {
   const token = req.headers['x-auth-token'];
@@ -51,6 +53,12 @@ async function recordAttendanceHandler(req, res) {
 async function payAttendanceHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const student = await groupService.payAttendance(token, req.params.groupId, req.params.studentId);
+  res.json(student);
+}
+
+async function reversePayAttendanceHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const student = await groupService.reversePayAttendance(token, req.params.groupId, req.params.studentId);
   res.json(student);
 }
 

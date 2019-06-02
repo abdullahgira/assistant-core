@@ -211,6 +211,33 @@ class GroupService {
     await student.save();
     return { student };
   }
+
+  async reversePayAttendance(token, groupId, studentId) {
+    /**
+     * @param token -> json web token
+     * @param groupId -> the group id at wich the attendance will be recorded
+     * @param studentId -> the id of the student that will record attendance
+     *
+     * Decrement attendancePyament number for student and remove the last
+     * payment details, this method will throw an error if it is fired and there is 0
+     * attendancePayment.
+     *
+     */
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+    const group = await validator.validateGroupExistence(groupId);
+
+    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
+
+    const student = await validator.validateStudentExistence(studentId);
+    if (student.attendancePayment.number === 0) throw new errorHandler.ReachedMaxReversePayValue();
+
+    student.attendancePayment.number--;
+    student.attendancePayment.details.shift();
+
+    await student.save();
+    return { student };
+  }
 }
 
 exports.GroupService = GroupService;
