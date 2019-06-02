@@ -183,7 +183,7 @@ class GroupService {
     student.attendance.hasRecordedAttendance = true;
 
     await student.save();
-    return { message: 'Success' };
+    return { student };
   }
 
   async payAttendance(token, groupId, studentId) {

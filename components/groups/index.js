@@ -44,8 +44,8 @@ async function setNewAttendanceHandler(req, res) {
 
 async function recordAttendanceHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const message = await groupService.recordAttendance(token, req.params.groupId, req.params.studentId);
-  res.json(message);
+  const student = await groupService.recordAttendance(token, req.params.groupId, req.params.studentId);
+  res.json(student);
 }
 
 async function payAttendanceHandler(req, res) {
