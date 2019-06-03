@@ -1,5 +1,6 @@
 const { assistantCollection } = require('./model');
 const schema = require('./schema');
+const middleware = require('./middleware');
 const generalErrorHandler = require('../error');
 
 class AssistantService {
@@ -14,6 +15,13 @@ class AssistantService {
 
     await user.save();
     return user;
+  }
+
+  async getProfile(token) {
+    const assistantId = middleware.authorize(token);
+    const assistant = await assistantCollection.findById(assistantId);
+    if (!assistant) throw new generalErrorHandler.InvalidToken();
+    return { assistant };
   }
 }
 

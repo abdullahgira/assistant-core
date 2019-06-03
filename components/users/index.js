@@ -6,6 +6,7 @@ const userService = new UserService();
 
 // user components
 router.use('/teacher', require('./teacher'));
+router.use('/assistant', require('./assistant'));
 
 router.post('/register', registerHandler);
 router.post('/login', loginHandler);
