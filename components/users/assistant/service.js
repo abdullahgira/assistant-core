@@ -23,6 +23,23 @@ class AssistantService {
     if (!assistant) throw new generalErrorHandler.InvalidToken();
     return { assistant };
   }
+
+  async changeProfile(body, token) {
+    const assistantId = middleware.authorize(token);
+    const assistant = await assistantCollection.findById(assistantId);
+
+    if (!assistant) throw new generalErrorHandler.InvalidToken();
+
+    const { error } = schema.changeProfile(body);
+    if (error) throw new generalErrorHandler.ValidationError(error.details[0].message);
+
+    for (let property in body) {
+      assistant[property] = body[property];
+    }
+
+    await assistant.save();
+    return { assistant };
+  }
 }
 
 exports.AssistantService = AssistantService;
