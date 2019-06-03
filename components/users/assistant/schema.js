@@ -15,4 +15,18 @@ function register(user) {
   return Joi.validate(user, schema);
 }
 
+function changeProfile(user) {
+  const schema = {
+    phone: Joi.string()
+      .regex(/^\+?[0-9]+/)
+      .min(11)
+      .max(13),
+    name: Joi.string()
+      .min(4)
+      .max(255)
+  };
+  return Joi.validate(user, schema);
+}
+
 exports.register = register;
+exports.changeProfile = changeProfile;
