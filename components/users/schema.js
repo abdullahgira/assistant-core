@@ -16,7 +16,9 @@ function register(user) {
     name: Joi.string(),
     phone: Joi.string(),
     subject: Joi.string(),
-    code: Joi.string()
+    code: Joi.string(),
+    address: Joi.string(),
+    age: Joi.number()
   };
   return Joi.validate(user, schema);
 }
