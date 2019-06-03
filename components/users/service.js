@@ -6,6 +6,7 @@ const schema = require('./schema');
 // const { teacherCollection } = require('./teacher/model');
 const { TeacherService } = require('./teacher/service');
 const { AssistantService } = require('./assistant/service');
+const { StudentService } = require('./student/service');
 
 class UserService {
   async register(body) {
@@ -33,6 +34,9 @@ class UserService {
         break;
       case 'assistant':
         user = await AssistantService.register(body);
+        break;
+      case 'student':
+        user = await StudentService.register(body);
         break;
     }
 
