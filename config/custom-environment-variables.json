@@ -1,0 +1,4 @@
+{
+  "jwtPrivateKey": "assistant_jwtPrivateKey",
+  "mongodb": "assistant_mongodb"
+}

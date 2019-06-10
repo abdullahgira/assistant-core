@@ -1,3 +1,4 @@
+const config = require('config');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const shortid = require('shortid');
@@ -36,8 +37,6 @@ const userSchema = new Schema({
   }
 });
 
-
-
 userSchema.methods.hashPassword = async password => {
   const salt = await bcrypt.genSalt(10);
   return await bcrypt.hash(password, salt);
@@ -48,10 +47,7 @@ userSchema.methods.validatePassword = async (passedPassword, password) => {
 };
 
 userSchema.methods.generateAuthToken = function() {
-  return jwt.sign(
-    { _id: this._id, isAdmin: this.isAdmin, role: this.role },
-    'SecureKey'
-  );
+  return jwt.sign({ _id: this._id, isAdmin: this.isAdmin, role: this.role }, config.get('jwtPrivateKey'));
 };
 
 exports.userCollection = mongoose.model('User', userSchema);

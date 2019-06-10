@@ -4,6 +4,7 @@ const winston = require('./config/winston');
 const morgan = require('morgan');
 const helmet = require('helmet');
 const compression = require('compression');
+const config = require('config');
 
 // Catch async errors and pass them to the error route
 require('make-promises-safe');
@@ -13,7 +14,7 @@ const bodyParser = require('body-parser');
 const app = express();
 
 mongoose
-  .connect('mongodb://localhost:27017/assistant-core', { useNewUrlParser: true })
+  .connect(config.get('mongodb'), { useNewUrlParser: true })
   .then(() => winston.info('Connected to MongoDB...'))
   .catch(err => winston.error('Could not connect to MongoDB...', err));
 
