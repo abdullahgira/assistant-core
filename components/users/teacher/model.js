@@ -35,6 +35,17 @@ const teacherSchema = new Schema({
     number: { type: Number, default: 0 },
     details: [{ _id: String, name: String }]
   },
+  posts: {
+    number: { type: Number, default: 0 },
+    details: [
+      {
+        _id: { type: String, required: true },
+        title: { type: String, required: true },
+        role: { type: String, required: true },
+        groupId: { type: String, required: true }
+      }
+    ]
+  },
   subject: String,
   recentlyVerified: Date
 });
