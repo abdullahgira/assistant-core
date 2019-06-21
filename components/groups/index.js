@@ -9,10 +9,12 @@ router.post('/create_group', createGroupHandler);
 router.post('/group_:id/add_student', addStudentHandler);
 router.delete('/group_:groupId/students/student_:studentId', removeStudentHandler);
 
-router.get('/group_:groupId/set_new_attendance_record', setNewAttendanceHandler);
+router.get('/group_:groupId/set_new_attendance_record', setNewAttendanceRecordHandler);
 router.get('/group_:groupId/record_attendance/student_:studentId', recordAttendanceHandler);
 
-router.get('/group_:groupId/pay_attendance/student_:studentId', payAttendanceHandler);
+router.post('/set_attendance_payment', setAttendancePaymentHandler);
+
+router.post('/group_:groupId/pay_attendance/student_:studentId', payAttendanceHandler);
 router.get('/group_:groupId/reverse_pay_attendance/student_:studentId', reversePayAttendanceHandler);
 
 router.get('/group_:groupId/pay_books/student_:studentId', payBooksHandler);
@@ -43,7 +45,7 @@ async function removeStudentHandler(req, res) {
   res.json(statusCode);
 }
 
-async function setNewAttendanceHandler(req, res) {
+async function setNewAttendanceRecordHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const message = await groupService.setNewAttendanceRecord(token, req.params.groupId);
   res.json(message);
@@ -57,7 +59,7 @@ async function recordAttendanceHandler(req, res) {
 
 async function payAttendanceHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const student = await groupService.payAttendance(token, req.params.groupId, req.params.studentId);
+  const student = await groupService.payAttendance(token, req.params.groupId, req.params.studentId, req.body);
   res.json(student);
 }
 
@@ -83,6 +85,12 @@ async function getStudentDetailsHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const student = await groupService.getStudentDetails(token, req.params.studentId);
   res.json(student);
+}
+
+async function setAttendancePaymentHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const status = await groupService.setAttendancePaymentAmount(token, body, req.query.type);
+  res.json(status);
 }
 
 module.exports = router;

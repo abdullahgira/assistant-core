@@ -24,5 +24,13 @@ function addStudent(body) {
   return Joi.validate(body, schema);
 }
 
+function paymentAmount(body) {
+  const schema = {
+    amount: Joi.number().required()
+  };
+  return Joi.validate(body, schema);
+}
+
 exports.createGroup = createGroup;
 exports.addStudent = addStudent;
+exports.paymentAmount = paymentAmount;

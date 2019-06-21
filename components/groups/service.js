@@ -169,7 +169,7 @@ class GroupService {
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
-    const attendanceDate = group.attendance_record.details[0].date;
+    const attendanceDate = new Date(Date.now()).toLocaleString();
 
     if (student.groupId !== groupId) {
       student.attendance.attendedFromAnotherGroup = true;
@@ -188,28 +188,58 @@ class GroupService {
     return { student };
   }
 
-  async payAttendance(token, groupId, studentId) {
+  async setAttendancePaymentAmount(token, body, type) {
+    // group.attendancePayment
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+    const groups = await groupCollection.find({ teacherId: assistant.teacherId });
+
+    schema.paymentAmount(body);
+    validator.validateAmount(body.amount);
+
+    groups.forEach(async g => {
+      type === 'attendance' ? (g.attendancePayment = body.amount) : (g.booksPayment = body.amount);
+      await g.save();
+    });
+
+    return 200;
+  }
+
+  async payAttendance(token, groupId, studentId, body) {
     /**
      * @param token -> json web token
      * @param groupId -> the group id at wich the attendance will be recorded
      * @param studentId -> the id of the student that will record attendance
+     * @returns the update student info.
      *
      * Increments attendancePyament number for student and add the current date
      * to the details of the payment, this method can be called as many times as needed
      * and should be reversed by reversePayAttendance.
      *
      */
+
+    //  authorizing and validating the token to be of an assistant
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
+    // validating groupId
     const group = await validator.validateGroupExistence(groupId);
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
+    // validating studentId and that he is with the same teacher as the assistant
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
+    // validating amount is bigger than 0
+    schema.paymentAmount(body);
+    validator.validateAmount(body.amount);
+
     student.attendancePayment.number++;
-    student.attendancePayment.details.unshift(group.attendance_record.details[0].date);
+    student.attendancePayment.totalPaid += body.amount;
+    student.attendancePayment.details.unshift({
+      amount: body.amount,
+      date: new Date(Date.now()).toLocaleString()
+    });
 
     await student.save();
     return { student };
@@ -220,6 +250,7 @@ class GroupService {
      * @param token -> json web token
      * @param groupId -> the group id at wich the attendance will be recorded
      * @param studentId -> the id of the student that will record attendance
+     * @returns the updated student info
      *
      * Decrement attendancePyament number for student and remove the last
      * payment details, this method will throw an error if it is fired and there is 0
@@ -235,10 +266,16 @@ class GroupService {
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
-    if (student.attendancePayment.number === 0) throw new errorHandler.ReachedMaxReversePayValue();
+    // the or statement is to make sure it doesn't make an invalid operation,
+    // although it should be impossible to happen.
+    if (student.attendancePayment.number === 0 || student.attendancePayment.totalPaid === 0)
+      throw new errorHandler.ReachedMaxReversePayValue();
+
+    // getting the details of the last payment
+    const lastPaymentDetails = student.attendancePayment.details.shift();
 
     student.attendancePayment.number--;
-    student.attendancePayment.details.shift();
+    student.attendancePayment.totalPaid -= lastPaymentDetails.amount;
 
     await student.save();
     return { student };

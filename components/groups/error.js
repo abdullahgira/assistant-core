@@ -46,9 +46,18 @@ class ReachedMaxReversePayValue extends Error {
   }
 }
 
+class InvalidPaidAmount extends Error {
+  constructor(message = 'Invalid amount was given, only amounts that are bigger than 0 are accepted') {
+    super(message);
+    this.name = 'InvalidPaidAmount';
+    this.statusCode = 405;
+  }
+}
+
 exports.GroupCreationError = GroupCreationError;
 exports.InvalidGroupId = InvalidGroupId;
 exports.DoublicateEntry = DoublicateEntry;
 exports.Forbidden = Forbidden;
 exports.StudentHasRecordedAttendance = StudentHasRecordedAttendance;
 exports.ReachedMaxReversePayValue = ReachedMaxReversePayValue;
+exports.InvalidPaidAmount = InvalidPaidAmount;
