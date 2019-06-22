@@ -114,6 +114,47 @@ class GroupService {
     return { status: 200 }; // success message
   }
 
+  async showAllStudents(token, from, to) {
+    /**
+     * @param token -> assistant json web token
+     * @param from -> return students starting from student number {from}
+     * @param to -> return students up to student number {to}
+     *
+     * Takes from, to or none of them, if from was given and to was not it will return
+     * starting from student {from} up to student {from + 20}, if to was given and to was bigger
+     * than students.length the remaining students only are gonna be returned, else it will return up
+     * to student number {to}
+     *
+     * If any invaild value was passed, from will be reset to 0 and to will be reset to 20
+     *
+     */
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    const allStudents = await studentTeacherCollection.find({ teacherId: assistant.teacherId });
+    const maxStudentsReturn = 20;
+
+    let validTo = 0;
+    let students = [];
+
+    from = parseInt(from);
+    to = parseInt(to);
+
+    if (!from || from < 0) from = 0;
+    if (!to || to < 0 || to < from) to = from + maxStudentsReturn;
+
+    if (from < allStudents.length) {
+      to - from <= maxStudentsReturn ? (validTo = to) : (validTo = from + maxStudentsReturn);
+      to >= allStudents.length && (validTo = from + (allStudents.length - from));
+
+      for (let i = from; i < validTo; i++) {
+        students.push(allStudents[i]);
+      }
+    }
+
+    return students;
+  }
+
   async setNewAttendanceRecord(token, groupId) {
     /**
      * @param token -> json web token
