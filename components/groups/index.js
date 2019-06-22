@@ -4,6 +4,7 @@ const router = express.Router();
 const { GroupService } = require('./service');
 const groupService = new GroupService();
 
+router.get('/', showAllGroupsHandler);
 router.post('/create_group', createGroupHandler);
 
 router.post('/group_:id/add_student', addStudentHandler);
@@ -19,6 +20,12 @@ router.get('/group_:groupId/pay_books/student_:studentId', payBooksHandler);
 router.get('/group_:groupId/reverse_pay_books/student_:studentId', reversePayBooksHandler);
 
 router.get('/student_:studentId', getStudentDetailsHandler);
+
+async function showAllGroupsHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const groups = await groupService.showAllGroups(token, req.query.day);
+  res.json(groups);
+}
 
 async function createGroupHandler(req, res) {
   const token = req.headers['x-auth-token'];

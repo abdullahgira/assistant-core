@@ -41,6 +41,20 @@ class GroupService {
     return group;
   }
 
+  async showAllGroups(token, day) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    const validDays = ['sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri'];
+    const validGivenDay = validDays.filter(d => d === day)[0];
+
+    if (validGivenDay) {
+      return await groupCollection.find({ teacherId: assistant.teacherId, day: day });
+    } else {
+      return await groupCollection.find({ teacherId: assistant.teacherId });
+    }
+  }
+
   async addStudent(body, token, groupId) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
