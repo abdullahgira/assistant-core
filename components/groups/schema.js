@@ -5,6 +5,9 @@ function createGroup(body) {
     name: Joi.string()
       .min(4)
       .max(50)
+      .required(),
+    day: Joi.string()
+      .valid('sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri')
       .required()
   };
   return Joi.validate(body, schema);

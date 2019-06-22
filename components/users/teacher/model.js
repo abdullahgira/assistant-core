@@ -33,7 +33,7 @@ const teacherSchema = new Schema({
   },
   groups: {
     number: { type: Number, default: 0 },
-    details: [{ _id: String, name: String }]
+    details: [{ _id: String, name: String, day: String }]
   },
   subject: String,
   recentlyVerified: Date

@@ -22,6 +22,10 @@ const groupSchema = new Schema({
     number: { type: Number, default: 0 },
     details: [{ _id: String, name: String }]
   },
+  day: {
+    type: String,
+    enum: ['sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri']
+  },
   date: {
     type: Date,
     default: Date.now

@@ -21,16 +21,19 @@ class GroupService {
     // accessing the teacher to check for double names
     const teacher = await teacherCollection.findById(assistant.teacherId);
 
-    const isDuplicateName = teacher.groups.details.find(g => g.name === body.name.trim());
+    const isDuplicateName = teacher.groups.details.find(
+      g => g.name === body.name.trim() && g.day === body.day
+    );
     if (isDuplicateName) throw new errorHandler.DoublicateEntry();
 
     const group = new groupCollection({
       name: body.name.trim(),
+      day: body.day,
       teacherId: teacher._id
     });
 
     teacher.groups.number++;
-    teacher.groups.details.push({ _id: group._id, name: body.name });
+    teacher.groups.details.push({ _id: group._id, name: group.name, day: group.day });
 
     await group.save();
     await teacher.save();
