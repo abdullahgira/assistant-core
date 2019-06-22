@@ -4,7 +4,7 @@
 
 `POST /api/users/register`
 
-```json
+```
 # request body
 {
   "code",
@@ -15,7 +15,7 @@
 }
 ```
 
-```json
+```
 # response body
 {
   "_id",
@@ -30,7 +30,7 @@
 
 `POST /api/users/login`
 
-```json
+```
 # request body
 {
   "email",
@@ -38,7 +38,7 @@
 }
 ```
 
-```json
+```
 # response body
 {
   "_id",
@@ -53,20 +53,49 @@
 
 ## Group
 
+### Show all groups
+
+`GET /api/groups?day=sat` or `GET /api/groups`
+If day is not passed or was given a wrong value all the groups are gonna be shown, othewise the groups
+of the given day only are gonna be shown
+
+```
+# req GET /api/groups?day=sat
+[
+  {
+    "attendance_record": {
+      "number": 0,
+      "details": []
+    },
+    "students": {
+      "number": 0,
+      "details": []
+    },
+    "_id": "d4ZsYxoWS",
+    "name": "Group 1",
+    "day": "sat",
+    "teacherId": "IfqWZuiGL",
+    "date": "2019-06-22T12:24:37.109Z",
+    "__v": 0
+  }
+]
+```
+
 #### Create group
 
 `POST /api/groups/create_group`
 
-```json
+```
 # req body
 {
-  "name"
+  "name",
+  "day" # must be one of theses 'sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri'
 }
 # req headers
 "x-auth-token" -> of the assistant
 ```
 
-```json
+```
 # res body
 {
   "attendance_record": {
@@ -89,7 +118,7 @@
 
 `POST /api/groups/group_zrHiAcc0v/add_student`
 
-```json
+```
 # req body
 {
   "name",
@@ -111,7 +140,7 @@
 
 `GET /api/groups/group_zrHiAcc0v/set_new_attendance_record`
 
-```json
+```
 # res body
 {
   "_id",
@@ -123,7 +152,7 @@
 
 `GET /api/groups/group_zrHiAcc0v/record_attendance/student_iNwCDfafe`
 
-```json
+```
 # res body
 {
   "student": {
@@ -161,7 +190,7 @@
 
 `GET /api/groups/student_iNwCDfafe`
 
-```json
+```
 # res body
 
 {
