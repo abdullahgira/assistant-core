@@ -197,33 +197,20 @@ class GroupService {
     return { student };
   }
 
-  async setAttendancePaymentAmount(token, body, type) {
-    // group.attendancePayment
+  async setAttendancePaymentAmount(token, body) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
-    const groups = await groupCollection.find({ teacherId: assistant.teacherId });
 
     schema.paymentAmount(body);
     validator.validateAmount(body.amount);
 
-    let appliedPayment = '';
-    switch (type) {
-      case 'attendance':
-        appliedPayment = 'attendancePayment';
-        break;
-      case 'books':
-        appliedPayment = 'booksPayment';
-        break;
-      default:
-        throw new errorHandler.InvalidPaymentType();
-    }
+    await groupCollection.updateMany(
+      { teacherId: assistant.teacherId },
+      { attendancePayment: body.amount },
+      { new: true, strict: false }
+    );
 
-    groups.forEach(async g => {
-      g[appliedPayment] = body.amount;
-      await g.save();
-    });
-
-    return 200;
+    return { status: 200 };
   }
 
   async payAttendance(token, groupId, studentId, body) {

@@ -89,7 +89,7 @@ async function getStudentDetailsHandler(req, res) {
 
 async function setAttendancePaymentHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const status = await groupService.setAttendancePaymentAmount(token, body, req.query.type);
+  const status = await groupService.setAttendancePaymentAmount(token, req.body);
   res.json(status);
 }
 
