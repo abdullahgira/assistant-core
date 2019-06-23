@@ -31,13 +31,13 @@ const studentTeacherSchema = new Schema({
     number: { type: Number, default: 0 },
     totalPaid: { type: Number, default: 0 },
     totalUnpaid: { type: Number, default: 0 },
-    details: [{ amount: String, date: String }]
+    details: [{ amount: Number, date: String }]
   },
   booksPayment: {
     number: { type: Number, default: 0 },
     totalPaid: { type: Number, default: 0 },
     totalUnpaid: { type: Number, default: 0 },
-    details: [{ amount: String, date: String }]
+    details: [{ amount: Number, date: String }]
   }
 });
 

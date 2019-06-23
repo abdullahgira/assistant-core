@@ -285,6 +285,7 @@ class GroupService {
 
     student.attendancePayment.number--;
     student.attendancePayment.totalPaid -= lastPaymentDetails.amount;
+    student.attendancePayment.totalUnpaid += lastPaymentDetails.amount;
 
     await student.save();
     return { student };
