@@ -38,7 +38,7 @@ class GroupService {
     await group.save();
     await teacher.save();
 
-    return group;
+    return await groupCollection.find({ teacherId: group.teacherId, day: group.day });
   }
 
   async showAllGroups(token, day) {
