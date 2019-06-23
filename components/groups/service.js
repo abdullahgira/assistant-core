@@ -110,12 +110,17 @@ class GroupService {
      * if the student came from anoter group, we only set attendedFromAnotherGroup to false
      * and do nothing else.
      *
+     * For payments, the totalUnpaid property in the student.attendancePayment is incremented by
+     * the attendance payment amount from the group
+     *
      */
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
     const group = await validator.validateGroupExistence(groupId);
 
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
+
+    if (!group.attendancePayment) throw new Error('No attendance payment is set for the group');
 
     const students = await studentTeacherCollection.find({ groupId: groupId });
     const nowDate = new Date(Date.now()).toLocaleString();
@@ -132,9 +137,13 @@ class GroupService {
       if (s.attendance.attendedFromAnotherGroup) {
         s.attendance.attendedFromAnotherGroup = false;
       } else {
+        // absence record
         s.absence.number++;
         s.absence.details.unshift(nowDate);
         s.attendance.hasRecordedAttendance = false;
+
+        // payment record
+        s.attendancePayment.totalUnpaid += group.attendancePayment;
       }
       await s.save();
     });
@@ -247,6 +256,7 @@ class GroupService {
     validator.validateAmount(body.amount);
 
     student.attendancePayment.number++;
+    student.attendancePayment.totalUnpaid -= body.amount;
     student.attendancePayment.totalPaid += body.amount;
     student.attendancePayment.details.unshift({
       amount: body.amount,
