@@ -18,7 +18,7 @@ const studentSchema = new Schema({
   address: { type: String, required: true },
   teachers: {
     number: { type: Number, default: 0 },
-    details: [{ _id: String, name: String, groupId: String }]
+    details: [{ _id: String, name: String, groupId: String, studentTeacherId: String }]
   }
 });
 

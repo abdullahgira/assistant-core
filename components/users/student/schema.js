@@ -26,4 +26,19 @@ function register(user) {
   return Joi.validate(user, schema);
 }
 
+function joinTeacher(body) {
+  const schema = {
+    teacherId: Joi.string()
+      .min(9)
+      .max(9)
+      .required(),
+    code: Joi.string()
+      .min(9)
+      .max(9)
+      .required()
+  };
+  return Joi.validate(body, schema);
+}
+
 exports.register = register;
+exports.joinTeacher = joinTeacher;

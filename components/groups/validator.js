@@ -30,3 +30,7 @@ exports.validateGroupCanBeModifiedByAssistant = (group, assistant) => {
 exports.validateStudentCanBeModifiedByAssistant = (student, assistant) => {
   if (student.teacherId !== assistant.teacherId) throw new errorHandler.Forbidden();
 };
+
+exports.validateAmount = amount => {
+  if (amount <= 0) throw new errorHandler.InvalidPaidAmount();
+};
