@@ -23,6 +23,10 @@ function changeProfile(user) {
       .max(13),
     name: Joi.string()
       .min(4)
+      .max(255),
+    email: Joi.string().email({ minDomainAtoms: 2 }),
+    password: Joi.string()
+      .min(6)
       .max(255)
   };
   return Joi.validate(user, schema);

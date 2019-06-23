@@ -1,6 +1,8 @@
 const { assistantCollection } = require('./model');
 const schema = require('./schema');
 const middleware = require('./middleware');
+
+const { userCollection } = require('../model');
 const generalErrorHandler = require('../error');
 
 class AssistantService {
@@ -21,7 +23,9 @@ class AssistantService {
     const assistantId = middleware.authorize(token);
     const assistant = await assistantCollection.findById(assistantId);
     if (!assistant) throw new generalErrorHandler.InvalidToken();
-    return { assistant };
+
+    const assistantUser = await userCollection.findById(assistantId);
+    return { ...assistant._doc, email: assistantUser.email };
   }
 
   async changeProfile(body, token) {
@@ -30,15 +34,27 @@ class AssistantService {
 
     if (!assistant) throw new generalErrorHandler.InvalidToken();
 
+    const assistantUser = await userCollection.findById(assistantId);
+
     const { error } = schema.changeProfile(body);
     if (error) throw new generalErrorHandler.ValidationError(error.details[0].message);
 
     for (let property in body) {
-      assistant[property] = body[property];
+      switch (property) {
+        case 'email':
+          assistantUser.email = body.email;
+          break;
+        case 'password':
+          assistantUser.password = await assistantUser.hashPassword(body.password);
+          break;
+        default:
+          assistant[property] = body[property];
+      }
     }
 
     await assistant.save();
-    return { assistant };
+    await assistantUser.save();
+    return { ...assistant._doc, email: assistantUser.email };
   }
 }
 
