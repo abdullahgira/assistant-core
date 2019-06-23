@@ -54,6 +54,14 @@ class InvalidPaidAmount extends Error {
   }
 }
 
+class InvalidPaymentType extends Error {
+  constructor(message = 'Invalid type was given, only "amount" and "attendance" are available') {
+    super(message);
+    this.name = 'InvalidPaidAmount';
+    this.statusCode = 405;
+  }
+}
+
 exports.GroupCreationError = GroupCreationError;
 exports.InvalidGroupId = InvalidGroupId;
 exports.DoublicateEntry = DoublicateEntry;
@@ -61,3 +69,4 @@ exports.Forbidden = Forbidden;
 exports.StudentHasRecordedAttendance = StudentHasRecordedAttendance;
 exports.ReachedMaxReversePayValue = ReachedMaxReversePayValue;
 exports.InvalidPaidAmount = InvalidPaidAmount;
+exports.InvalidPaymentType = InvalidPaymentType;

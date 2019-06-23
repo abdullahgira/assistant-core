@@ -197,8 +197,20 @@ class GroupService {
     schema.paymentAmount(body);
     validator.validateAmount(body.amount);
 
+    let appliedPayment = '';
+    switch (type) {
+      case 'attendance':
+        appliedPayment = 'attendancePayment';
+        break;
+      case 'books':
+        appliedPayment = 'booksPayment';
+        break;
+      default:
+        throw new errorHandler.InvalidPaymentType();
+    }
+
     groups.forEach(async g => {
-      type === 'attendance' ? (g.attendancePayment = body.amount) : (g.booksPayment = body.amount);
+      g[appliedPayment] = body.amount;
       await g.save();
     });
 
