@@ -20,6 +20,7 @@ const groupSchema = new Schema({
   },
   attendancePayment: Number,
   booksPayment: Number,
+  nBooksPayment: Number,
   students: {
     number: { type: Number, default: 0 },
     details: [{ _id: String, name: String }]

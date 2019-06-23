@@ -15,10 +15,13 @@ router.get('/group_:groupId/record_attendance/student_:studentId', recordAttenda
 router.post('/set_attendance_payment', setAttendancePaymentHandler);
 router.post('/set_books_payment', setBooksPaymentHandler);
 
+router.get('/take_books_payment', takeBooksPaymentHandler);
+router.get('/reverse_take_books_payment', reverseTakeBooksPaymentHandler);
+
 router.post('/group_:groupId/pay_attendance/student_:studentId', payAttendanceHandler);
 router.get('/group_:groupId/reverse_pay_attendance/student_:studentId', reversePayAttendanceHandler);
 
-router.get('/group_:groupId/pay_books/student_:studentId', payBooksHandler);
+router.post('/group_:groupId/pay_books/student_:studentId', payBooksHandler);
 router.get('/group_:groupId/reverse_pay_books/student_:studentId', reversePayBooksHandler);
 
 router.get('/student_:studentId', getStudentDetailsHandler);
@@ -72,7 +75,7 @@ async function reversePayAttendanceHandler(req, res) {
 
 async function payBooksHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const student = await groupService.payBooks(token, req.params.groupId, req.params.studentId);
+  const student = await groupService.payBooks(token, req.params.groupId, req.params.studentId, req.body);
   res.json(student);
 }
 
@@ -97,6 +100,18 @@ async function setAttendancePaymentHandler(req, res) {
 async function setBooksPaymentHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const status = await groupService.setBooksPayment(token, req.body);
+  res.json(status);
+}
+
+async function takeBooksPaymentHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const status = await groupService.takeBooksPayment(token);
+  res.json(status);
+}
+
+async function reverseTakeBooksPaymentHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const status = await groupService.reverseTakeBooksPayment(token);
   res.json(status);
 }
 

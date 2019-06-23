@@ -307,7 +307,52 @@ class GroupService {
     return { status: 200 };
   }
 
-  async payBooks(token, groupId, studentId) {
+  async takeBooksPayment(token) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    await groupCollection.updateMany(
+      { teacherId: assistant.teacherId },
+      { $inc: { nBooksPayment: 1 } },
+      { strict: false }
+    );
+
+    const group = await groupCollection.findOne({ teacherId: assistant.teacherId });
+    const booksPayment = group.booksPayment;
+
+    await studentTeacherCollection.updateMany(
+      { teacherId: assistant.teacherId },
+      {
+        $inc: {
+          'booksPayment.totalUnpaid': booksPayment
+        }
+      }
+    );
+    return { status: 200 };
+  }
+
+  async reverseTakeBooksPayment(token) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    const group = await groupCollection.findOne({ teacherId: assistant.teacherId });
+    const booksPayment = group.booksPayment;
+
+    if (!group.nBooksPayment) throw new errorHandler.ReachedMaxReversePayValue();
+
+    await groupCollection.updateMany({ teacherId: assistant.teacherId }, { $inc: { nBooksPayment: -1 } });
+    await studentTeacherCollection.updateMany(
+      { teacherId: assistant.teacherId },
+      {
+        $inc: {
+          'booksPayment.totalUnpaid': -booksPayment
+        }
+      }
+    );
+    return { status: 200 };
+  }
+
+  async payBooks(token, groupId, studentId, body) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
@@ -317,8 +362,18 @@ class GroupService {
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
+    schema.paymentAmount(body);
+    validator.validateAmount(body.amount);
+
+    if (!group.nBooksPayment) throw new Error('The group owner has not requested for a books payment');
+
     student.booksPayment.number++;
-    student.booksPayment.details.unshift(new Date(Date.now()).toLocaleString());
+    student.booksPayment.totalPaid += body.amount;
+    student.booksPayment.totalUnpaid -= body.amount;
+    student.booksPayment.details.unshift({
+      amount: body.amount,
+      date: new Date(Date.now()).toLocaleString()
+    });
 
     await student.save();
     return { student };
@@ -334,10 +389,15 @@ class GroupService {
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
-    if (student.booksPayment.number === 0) throw new errorHandler.ReachedMaxReversePayValue();
+    if (student.booksPayment.number === 0 || student.booksPayment.totalPaid === 0)
+      throw new errorHandler.ReachedMaxReversePayValue();
+
+    // getting the details of the last payment
+    const lastPaymentDetails = student.booksPayment.details.shift();
 
     student.booksPayment.number--;
-    student.booksPayment.details.shift();
+    student.booksPayment.totalPaid -= lastPaymentDetails.amount;
+    student.booksPayment.totalUnpaid += lastPaymentDetails.amount;
 
     await student.save();
     return { student };
