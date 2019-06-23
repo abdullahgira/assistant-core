@@ -291,6 +291,22 @@ class GroupService {
     return { student };
   }
 
+  async setBooksPayment(token, body) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    schema.paymentAmount(body);
+    validator.validateAmount(body.amount);
+
+    await groupCollection.updateMany(
+      { teacherId: assistant.teacherId },
+      { booksPayment: body.amount },
+      { new: true, strict: false }
+    );
+
+    return { status: 200 };
+  }
+
   async payBooks(token, groupId, studentId) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);

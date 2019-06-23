@@ -13,6 +13,7 @@ router.get('/group_:groupId/set_new_attendance_record', setNewAttendanceRecordHa
 router.get('/group_:groupId/record_attendance/student_:studentId', recordAttendanceHandler);
 
 router.post('/set_attendance_payment', setAttendancePaymentHandler);
+router.post('/set_books_payment', setBooksPaymentHandler);
 
 router.post('/group_:groupId/pay_attendance/student_:studentId', payAttendanceHandler);
 router.get('/group_:groupId/reverse_pay_attendance/student_:studentId', reversePayAttendanceHandler);
@@ -90,6 +91,12 @@ async function getStudentDetailsHandler(req, res) {
 async function setAttendancePaymentHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const status = await groupService.setAttendancePaymentAmount(token, req.body);
+  res.json(status);
+}
+
+async function setBooksPaymentHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const status = await groupService.setBooksPayment(token, req.body);
   res.json(status);
 }
 
