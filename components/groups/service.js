@@ -284,6 +284,20 @@ class GroupService {
     return { status: 200 };
   }
 
+  async setNAttendancesPerMonth(token, body) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    schema.nAttendancesPerMonth(body);
+    await groupCollection.updateMany(
+      { teacherId: assistant.teacherId },
+      { $set: { nAttendancePerMonth: body.number } },
+      { strict: false }
+    );
+
+    return { status: 200 };
+  }
+
   async payAttendance(token, groupId, studentId, body) {
     /**
      * @param token -> json web token

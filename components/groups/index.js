@@ -18,6 +18,8 @@ router.get('/group_:groupId/record_attendance/student_:studentId', recordAttenda
 router.post('/set_attendance_payment', setAttendancePaymentHandler); // handles month and lesson using the type query
 router.post('/set_books_payment', setBooksPaymentHandler);
 
+router.post('/set_number_of_attendances_per_month', setNAttendancesPerMonthHanlder);
+
 router.get('/take_books_payment', takeBooksPaymentHandler);
 router.get('/reverse_take_books_payment', reverseTakeBooksPaymentHandler);
 
@@ -127,6 +129,12 @@ async function takeBooksPaymentHandler(req, res) {
 async function reverseTakeBooksPaymentHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const status = await groupService.reverseTakeBooksPayment(token);
+  res.json(status);
+}
+
+async function setNAttendancesPerMonthHanlder(req, res) {
+  const token = req.headers['x-auth-token'];
+  const status = await groupService.setNAttendancesPerMonth(token, req.body);
   res.json(status);
 }
 
