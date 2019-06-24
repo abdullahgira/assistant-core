@@ -78,6 +78,14 @@ class PaymentIsAlreadyPaid extends Error {
   }
 }
 
+class NotAllowed extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'NotAllowed';
+    this.statusCode = 405;
+  }
+}
+
 exports.GroupCreationError = GroupCreationError;
 exports.InvalidGroupId = InvalidGroupId;
 exports.DoublicateEntry = DoublicateEntry;
@@ -88,3 +96,4 @@ exports.InvalidPaidAmount = InvalidPaidAmount;
 exports.InvalidPaymentType = InvalidPaymentType;
 exports.PaymentAmountIsUnknown = PaymentAmountIsUnknown;
 exports.PaymentIsAlreadyPaid = PaymentIsAlreadyPaid;
+exports.NotAllowed = NotAllowed;

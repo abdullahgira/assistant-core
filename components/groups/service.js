@@ -219,6 +219,10 @@ class GroupService {
 
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
+    if (group.attendance_record.details) {
+      throw new errorHandler.NotAllowed('There are no recorded attendances');
+    }
+
     return group.attendance_record.details[0];
   }
 
