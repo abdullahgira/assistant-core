@@ -201,7 +201,9 @@ class GroupService {
         s.attendance.hasRecordedAttendance = false;
 
         // payment record
-        s.attendancePayment.totalUnpaid += group.attendancePayment;
+        s.attendancePayment.nAvailableAttendances
+          ? s.attendancePayment.nAvailableAttendances--
+          : s.attendancePayment.nUnpaidAttendances++;
       }
       await s.save();
     });
@@ -298,7 +300,7 @@ class GroupService {
     return { status: 200 };
   }
 
-  async payAttendance(token, groupId, studentId, body) {
+  async payAttendance(token, groupId, studentId, type) {
     /**
      * @param token -> json web token
      * @param groupId -> the group id at wich the attendance will be recorded
@@ -323,15 +325,35 @@ class GroupService {
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
-    // validating amount is bigger than 0
-    schema.paymentAmount(body);
-    validator.validateAmount(body.amount);
+    switch (type) {
+      case 'month':
+        student.attendancePayment.number++;
+        student.attendancePayment.amount = group.monthlyPayment;
+        student.attendancePayment.totalPaid += group.monthlyPayment;
 
-    student.attendancePayment.number++;
-    student.attendancePayment.totalUnpaid -= body.amount;
-    student.attendancePayment.totalPaid += body.amount;
+        if (student.attendancePayment.nUnpaidAttendances > group.nAttendancePerMonth) {
+          student.attendancePayment.nUnpaidAttendances -= group.nAttendancePerMonth;
+          student.attendancePayment.nAvailableAttendances = 0;
+        } else {
+          student.attendancePayment.nAvailableAttendances =
+            group.nAttendancePerMonth - student.attendancePayment.nUnpaidAttendances;
+          console.log(group.nAttendancePerMonth - student.attendancePayment.nUnpaidAttendances);
+          console.log(typeof group.nAttendancePerMonth, typeof student.attendancePayment.nUnpaidAttendances);
+          student.attendancePayment.nUnpaidAttendances = 0;
+        }
+        break;
+      case 'lesson':
+        student.attendancePayment.number++;
+        student.attendancePayment.amount = group.attendancePayment;
+        student.attendancePayment.totalPaid += group.attendancePayment;
+        student.attendancePayment.nUnpaidAttendances--;
+        break;
+      default:
+        throw new errorHandler.InvalidPaymentType('type can only be "month" or "lesson"');
+    }
+
     student.attendancePayment.details.unshift({
-      amount: body.amount,
+      amount: student.attendancePayment.amount,
       date: new Date(Date.now()).toLocaleString()
     });
 
@@ -370,7 +392,15 @@ class GroupService {
 
     student.attendancePayment.number--;
     student.attendancePayment.totalPaid -= lastPaymentDetails.amount;
-    student.attendancePayment.totalUnpaid += lastPaymentDetails.amount;
+
+    const remainingDays = group.nAttendancePerMonth - student.attendancePayment.nAvailableAttendances;
+    if (remainingDays >= 0) {
+      student.attendancePayment.nAvailableAttendances = 0;
+      student.attendancePayment.nUnpaidAttendances = remainingDays;
+    } else {
+      student.attendancePayment.nAvailableAttendances -= group.nAttendancePerMonth;
+      student.attendancePayment.nUnpaidAttendances = 0;
+    }
 
     await student.save();
     return { student };

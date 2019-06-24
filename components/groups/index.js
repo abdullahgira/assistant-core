@@ -23,7 +23,7 @@ router.post('/set_number_of_attendances_per_month', setNAttendancesPerMonthHanld
 router.get('/take_books_payment', takeBooksPaymentHandler);
 router.get('/reverse_take_books_payment', reverseTakeBooksPaymentHandler);
 
-router.post('/group_:groupId/pay_attendance/student_:studentId', payAttendanceHandler);
+router.get('/group_:groupId/pay_attendance/student_:studentId', payAttendanceHandler); // uses url query to determine lesson or month payment
 router.get('/group_:groupId/reverse_pay_attendance/student_:studentId', reversePayAttendanceHandler);
 
 router.post('/group_:groupId/pay_books/student_:studentId', payBooksHandler);
@@ -80,7 +80,12 @@ async function recordAttendanceHandler(req, res) {
 
 async function payAttendanceHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const student = await groupService.payAttendance(token, req.params.groupId, req.params.studentId, req.body);
+  const student = await groupService.payAttendance(
+    token,
+    req.params.groupId,
+    req.params.studentId,
+    req.query.type
+  );
   res.json(student);
 }
 
