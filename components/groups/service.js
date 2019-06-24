@@ -201,7 +201,9 @@ class GroupService {
         s.attendance.hasRecordedAttendance = false;
 
         // payment record
-        s.attendancePayment.totalUnpaid += group.attendancePayment;
+        s.attendancePayment.nAvailableAttendances
+          ? s.attendancePayment.nAvailableAttendances--
+          : s.attendancePayment.nUnpaidAttendances++;
       }
       await s.save();
     });
@@ -265,23 +267,50 @@ class GroupService {
     return { student };
   }
 
-  async setAttendancePaymentAmount(token, body) {
+  async setAttendancePaymentAmount(token, body, type) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
     schema.paymentAmount(body);
     validator.validateAmount(body.amount);
 
+    switch (type) {
+      case 'lesson':
+        await groupCollection.updateMany(
+          { teacherId: assistant.teacherId },
+          { attendancePayment: body.amount },
+          { new: true, strict: false }
+        );
+        break;
+      case 'month':
+        await groupCollection.updateMany(
+          { teacherId: assistant.teacherId },
+          { monthlyPayment: body.amount },
+          { new: true, strict: false }
+        );
+        break;
+      default:
+        throw new errorHandler.InvalidPaymentType('type can only be "lesson" or "month"');
+    }
+
+    return { status: 200 };
+  }
+
+  async setNAttendancesPerMonth(token, body) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    schema.nAttendancesPerMonth(body);
     await groupCollection.updateMany(
       { teacherId: assistant.teacherId },
-      { attendancePayment: body.amount },
-      { new: true, strict: false }
+      { $set: { nAttendancePerMonth: body.number } },
+      { strict: false }
     );
 
     return { status: 200 };
   }
 
-  async payAttendance(token, groupId, studentId, body) {
+  async payAttendance(token, groupId, studentId, type) {
     /**
      * @param token -> json web token
      * @param groupId -> the group id at wich the attendance will be recorded
@@ -306,15 +335,38 @@ class GroupService {
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
-    // validating amount is bigger than 0
-    schema.paymentAmount(body);
-    validator.validateAmount(body.amount);
+    const previousNAvailableAttendances = student.attendancePayment.nAvailableAttendances;
+    const previousNUnpaidAttendances = student.attendancePayment.nUnpaidAttendances;
 
-    student.attendancePayment.number++;
-    student.attendancePayment.totalUnpaid -= body.amount;
-    student.attendancePayment.totalPaid += body.amount;
+    switch (type) {
+      case 'month':
+        student.attendancePayment.number++;
+        student.attendancePayment.amount = group.monthlyPayment;
+        student.attendancePayment.totalPaid += group.monthlyPayment;
+
+        if (student.attendancePayment.nUnpaidAttendances > group.nAttendancePerMonth) {
+          student.attendancePayment.nUnpaidAttendances -= group.nAttendancePerMonth;
+          student.attendancePayment.nAvailableAttendances = 0;
+        } else {
+          student.attendancePayment.nAvailableAttendances +=
+            group.nAttendancePerMonth - student.attendancePayment.nUnpaidAttendances;
+          student.attendancePayment.nUnpaidAttendances = 0;
+        }
+        break;
+      case 'lesson':
+        student.attendancePayment.number++;
+        student.attendancePayment.amount = group.attendancePayment;
+        student.attendancePayment.totalPaid += group.attendancePayment;
+        student.attendancePayment.nUnpaidAttendances--;
+        break;
+      default:
+        throw new errorHandler.InvalidPaymentType('type can only be "month" or "lesson"');
+    }
+
     student.attendancePayment.details.unshift({
-      amount: body.amount,
+      amount: student.attendancePayment.amount,
+      previousNAvailableAttendances,
+      previousNUnpaidAttendances,
       date: new Date(Date.now()).toLocaleString()
     });
 
@@ -353,7 +405,17 @@ class GroupService {
 
     student.attendancePayment.number--;
     student.attendancePayment.totalPaid -= lastPaymentDetails.amount;
-    student.attendancePayment.totalUnpaid += lastPaymentDetails.amount;
+    student.attendancePayment.nAvailableAttendances = lastPaymentDetails.previousNAvailableAttendances;
+    student.attendancePayment.nUnpaidAttendances = lastPaymentDetails.previousNUnpaidAttendances;
+
+    // const remainingDays = group.nAttendancePerMonth - student.attendancePayment.nAvailableAttendances;
+    // if (remainingDays >= 0) {
+    //   student.attendancePayment.nAvailableAttendances += 4;
+    //   // student.attendancePayment.nUnpaidAttendances = remainingDays;
+    // } else {
+    //   student.attendancePayment.nAvailableAttendances -= group.nAttendancePerMonth;
+    //   student.attendancePayment.nUnpaidAttendances = 0;
+    // }
 
     await student.save();
     return { student };

@@ -30,13 +30,22 @@ const studentTeacherSchema = new Schema({
   attendancePayment: {
     number: { type: Number, default: 0 },
     totalPaid: { type: Number, default: 0 },
-    totalUnpaid: { type: Number, default: 0 },
-    details: [{ amount: Number, date: String }]
+    nAvailableAttendances: { type: Number, default: 0 },
+    nUnpaidAttendances: { type: Number, default: 0 },
+    // totalUnpaid: { type: Number, default: 0 },
+    details: [
+      {
+        amount: Number,
+        date: String,
+        previousNAvailableAttendances: Number,
+        previousNUnpaidAttendances: Number
+      }
+    ]
   },
   booksPayment: {
     number: { type: Number, default: 0 },
     totalPaid: { type: Number, default: 0 },
-    totalUnpaid: { type: Number, default: 0 },
+    // totalUnpaid: { type: Number, default: 0 },
     details: [{ amount: Number, date: String }]
   }
 });

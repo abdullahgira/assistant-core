@@ -34,6 +34,17 @@ function paymentAmount(body) {
   return Joi.validate(body, schema);
 }
 
+function nAttendancesPerMonth(body) {
+  const schema = {
+    number: Joi.number()
+      .min(1)
+      .max(8)
+      .required()
+  };
+  return Joi.validate(body, schema);
+}
+
 exports.createGroup = createGroup;
 exports.addStudent = addStudent;
 exports.paymentAmount = paymentAmount;
+exports.nAttendancesPerMonth = nAttendancesPerMonth;

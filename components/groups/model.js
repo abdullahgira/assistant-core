@@ -19,6 +19,8 @@ const groupSchema = new Schema({
     details: [{ _id: String, teacherId: String, date: String }]
   },
   attendancePayment: Number,
+  monthlyPayment: Number,
+  nAttendancePerMonth: Number,
   booksPayment: Number,
   nBooksPayment: Number,
   students: {
