@@ -255,18 +255,31 @@ class GroupService {
     return { student };
   }
 
-  async setAttendancePaymentAmount(token, body) {
+  async setAttendancePaymentAmount(token, body, type) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
     schema.paymentAmount(body);
     validator.validateAmount(body.amount);
 
-    await groupCollection.updateMany(
-      { teacherId: assistant.teacherId },
-      { attendancePayment: body.amount },
-      { new: true, strict: false }
-    );
+    switch (type) {
+      case 'lesson':
+        await groupCollection.updateMany(
+          { teacherId: assistant.teacherId },
+          { attendancePayment: body.amount },
+          { new: true, strict: false }
+        );
+        break;
+      case 'month':
+        await groupCollection.updateMany(
+          { teacherId: assistant.teacherId },
+          { monthlyPayment: body.amount },
+          { new: true, strict: false }
+        );
+        break;
+      default:
+        throw new errorHandler.InvalidPaymentType('type can only be "lesson" or "month"');
+    }
 
     return { status: 200 };
   }

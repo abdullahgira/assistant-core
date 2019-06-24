@@ -15,7 +15,7 @@ router.delete('/group_:groupId/students/student_:studentId', removeStudentHandle
 router.get('/group_:groupId/set_new_attendance_record', setNewAttendanceRecordHandler);
 router.get('/group_:groupId/record_attendance/student_:studentId', recordAttendanceHandler);
 
-router.post('/set_attendance_payment', setAttendancePaymentHandler);
+router.post('/set_attendance_payment', setAttendancePaymentHandler); // handles month and lesson using the type query
 router.post('/set_books_payment', setBooksPaymentHandler);
 
 router.get('/take_books_payment', takeBooksPaymentHandler);
@@ -108,7 +108,7 @@ async function getStudentDetailsHandler(req, res) {
 
 async function setAttendancePaymentHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const status = await groupService.setAttendancePaymentAmount(token, req.body);
+  const status = await groupService.setAttendancePaymentAmount(token, req.body, req.query.type);
   res.json(status);
 }
 
