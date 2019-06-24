@@ -62,6 +62,22 @@ class InvalidPaymentType extends Error {
   }
 }
 
+class PaymentAmountIsUnknown extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'BooksPaymentIsUnknown';
+    this.statusCode = 405;
+  }
+}
+
+class PaymentIsAlreadyPaid extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'BooksPaymentIsUnknown';
+    this.statusCode = 405;
+  }
+}
+
 exports.GroupCreationError = GroupCreationError;
 exports.InvalidGroupId = InvalidGroupId;
 exports.DoublicateEntry = DoublicateEntry;
@@ -70,3 +86,5 @@ exports.StudentHasRecordedAttendance = StudentHasRecordedAttendance;
 exports.ReachedMaxReversePayValue = ReachedMaxReversePayValue;
 exports.InvalidPaidAmount = InvalidPaidAmount;
 exports.InvalidPaymentType = InvalidPaymentType;
+exports.PaymentAmountIsUnknown = PaymentAmountIsUnknown;
+exports.PaymentIsAlreadyPaid = PaymentIsAlreadyPaid;

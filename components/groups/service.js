@@ -482,7 +482,7 @@ class GroupService {
     return { status: 200 };
   }
 
-  async payBooks(token, groupId, studentId, body) {
+  async payBooks(token, groupId, studentId) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
@@ -492,16 +492,15 @@ class GroupService {
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
-    schema.paymentAmount(body);
-    validator.validateAmount(body.amount);
-
-    if (!group.nBooksPayment) throw new Error('The group owner has not requested for a books payment');
+    if (!group.booksPayment) throw new errorHandler.PaymentAmountIsUnknown('Books payment is unknown');
+    if (!student.booksPayment.totalUnpaid)
+      throw new errorHandler.PaymentIsAlreadyPaid('Already paid all the money');
 
     student.booksPayment.number++;
-    student.booksPayment.totalPaid += body.amount;
-    student.booksPayment.totalUnpaid -= body.amount;
+    student.booksPayment.totalPaid += group.booksPayment;
+    student.booksPayment.totalUnpaid -= group.booksPayment;
     student.booksPayment.details.unshift({
-      amount: body.amount,
+      amount: group.booksPayment,
       date: new Date(Date.now()).toLocaleString()
     });
 
