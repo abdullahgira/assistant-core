@@ -325,6 +325,9 @@ class GroupService {
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
+    const previousNAvailableAttendances = student.attendancePayment.nAvailableAttendances;
+    const previousNUnpaidAttendances = student.attendancePayment.nUnpaidAttendances;
+
     switch (type) {
       case 'month':
         student.attendancePayment.number++;
@@ -335,10 +338,8 @@ class GroupService {
           student.attendancePayment.nUnpaidAttendances -= group.nAttendancePerMonth;
           student.attendancePayment.nAvailableAttendances = 0;
         } else {
-          student.attendancePayment.nAvailableAttendances =
+          student.attendancePayment.nAvailableAttendances +=
             group.nAttendancePerMonth - student.attendancePayment.nUnpaidAttendances;
-          console.log(group.nAttendancePerMonth - student.attendancePayment.nUnpaidAttendances);
-          console.log(typeof group.nAttendancePerMonth, typeof student.attendancePayment.nUnpaidAttendances);
           student.attendancePayment.nUnpaidAttendances = 0;
         }
         break;
@@ -354,6 +355,8 @@ class GroupService {
 
     student.attendancePayment.details.unshift({
       amount: student.attendancePayment.amount,
+      previousNAvailableAttendances,
+      previousNUnpaidAttendances,
       date: new Date(Date.now()).toLocaleString()
     });
 
@@ -392,15 +395,17 @@ class GroupService {
 
     student.attendancePayment.number--;
     student.attendancePayment.totalPaid -= lastPaymentDetails.amount;
+    student.attendancePayment.nAvailableAttendances = lastPaymentDetails.previousNAvailableAttendances;
+    student.attendancePayment.nUnpaidAttendances = lastPaymentDetails.previousNUnpaidAttendances;
 
-    const remainingDays = group.nAttendancePerMonth - student.attendancePayment.nAvailableAttendances;
-    if (remainingDays >= 0) {
-      student.attendancePayment.nAvailableAttendances = 0;
-      student.attendancePayment.nUnpaidAttendances = remainingDays;
-    } else {
-      student.attendancePayment.nAvailableAttendances -= group.nAttendancePerMonth;
-      student.attendancePayment.nUnpaidAttendances = 0;
-    }
+    // const remainingDays = group.nAttendancePerMonth - student.attendancePayment.nAvailableAttendances;
+    // if (remainingDays >= 0) {
+    //   student.attendancePayment.nAvailableAttendances += 4;
+    //   // student.attendancePayment.nUnpaidAttendances = remainingDays;
+    // } else {
+    //   student.attendancePayment.nAvailableAttendances -= group.nAttendancePerMonth;
+    //   student.attendancePayment.nUnpaidAttendances = 0;
+    // }
 
     await student.save();
     return { student };
