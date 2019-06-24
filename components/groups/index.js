@@ -14,6 +14,7 @@ router.delete('/group_:groupId/students/student_:studentId', removeStudentHandle
 
 router.get('/group_:groupId/set_new_attendance_record', setNewAttendanceRecordHandler);
 router.get('/group_:groupId/record_attendance/student_:studentId', recordAttendanceHandler);
+router.get('/group_:groupId/show_recent_attendance_details', showRecentAttendanceDetailsHandler);
 
 router.post('/set_attendance_payment', setAttendancePaymentHandler);
 router.post('/set_books_payment', setBooksPaymentHandler);
@@ -128,6 +129,12 @@ async function reverseTakeBooksPaymentHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const status = await groupService.reverseTakeBooksPayment(token);
   res.json(status);
+}
+
+async function showRecentAttendanceDetailsHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const details = await groupService.showRecentAttendanceDetails(token, req.params.groupId);
+  res.json(details);
 }
 
 module.exports = router;

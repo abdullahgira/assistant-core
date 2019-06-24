@@ -210,6 +210,16 @@ class GroupService {
     return { _id: attendanceId, date: nowDate };
   }
 
+  async showRecentAttendanceDetails(token, groupId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+    const group = await validator.validateGroupExistence(groupId);
+
+    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
+
+    return group.attendance_record.details[0];
+  }
+
   async recordAttendance(token, groupId, studentId) {
     /**
      * @param token -> json web token
