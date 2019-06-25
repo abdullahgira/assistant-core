@@ -6,4 +6,22 @@ class DoublicateEntry extends Error {
   }
 }
 
+class StudentHasRecordedAttendance extends Error {
+  constructor(message = 'The student has already been recorded in the attendance.') {
+    super(message);
+    this.name = 'StudentMaxAttedanceRecorded';
+    this.statusCode = 405;
+  }
+}
+
+class InvalidAttendanceId extends Error {
+  constructor(message = 'Invalid attendance id') {
+    super(message);
+    this.name = 'InvalidAttendanceId';
+    this.statusCode = 400;
+  }
+}
+
 exports.DoublicateEntry = DoublicateEntry;
+exports.StudentHasRecordedAttendance = StudentHasRecordedAttendance;
+exports.InvalidAttendanceId = InvalidAttendanceId;

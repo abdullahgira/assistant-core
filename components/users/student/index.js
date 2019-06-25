@@ -8,6 +8,7 @@ router.post('/join_teacher', joinTeacherHandler);
 router.get('/teachers', viewJoinedTeachersHandler);
 
 router.get('/teachers/teacher_:teacherId', viewTeacherDetailsHandler);
+router.get('/attendance_:attendanceId/group_:groupId', recordAttendanceHandler);
 
 async function joinTeacherHandler(req, res) {
   const token = req.headers['x-auth-token'];
@@ -25,6 +26,16 @@ async function viewTeacherDetailsHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const studentTeacherDetails = await studentService.viewTeacherDetails(token, req.params.teacherId);
   res.json(studentTeacherDetails);
+}
+
+async function recordAttendanceHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const attendanceDetails = await studentService.recordAttendance(
+    token,
+    req.params.attendanceId,
+    req.params.groupId
+  );
+  res.json(attendanceDetails);
 }
 
 module.exports = router;

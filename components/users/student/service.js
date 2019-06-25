@@ -1,11 +1,13 @@
 const generalErrorHandler = require('../error');
 const { studentTeacherCollection } = require('../studentTeacher.model');
 const { teacherCollection } = require('../teacher/model');
+const { groupCollection } = require('../../groups/model');
 
 const { studentCollection } = require('./model');
 const schema = require('./schema');
 const middleware = require('./middleware');
 const validator = require('./validator');
+const errorHandler = require('./error');
 
 class StudentService {
   static async register(body) {
@@ -40,7 +42,10 @@ class StudentService {
     student.teachers.number++;
     student.teachers.details.push({ _id: teacherId, name: teacher.name, groupId, studentTeacherId });
 
+    studentTeacher.studentId = studentId;
+
     await student.save();
+    await studentTeacher.save();
     return student;
   }
 
@@ -53,13 +58,43 @@ class StudentService {
 
   async viewTeacherDetails(token, teacherId) {
     const studentId = middleware.authorize(token);
-    const student = await studentCollection.findById(studentId);
 
-    const teacherDetails = student.teachers.details.find(t => t._id === teacherId);
-    const studentTeacherId = teacherDetails.studentTeacherId;
+    const studentTeacher = await studentTeacherCollection.findOne({ studentId, teacherId });
+    return studentTeacher;
+  }
 
-    const studentTeacher = await studentTeacherCollection.find({ _id: studentTeacherId });
-    return studentTeacher[0];
+  async recordAttendance(token, attendanceId, groupId) {
+    const studentId = middleware.authorize(token);
+    const group = await groupCollection.findById(groupId);
+
+    let student = await studentTeacherCollection.findOne({ studentId, groupId });
+    let studentInGroup = true;
+    if (!student) {
+      studentInGroup = false;
+      student = await studentTeacherCollection.findOne({ studentId });
+    }
+
+    const attendanceDate = new Date(Date.now()).toLocaleString();
+
+    if (group.attendance_record.details[0]._id === attendanceId) {
+      if (!studentInGroup) {
+        student.attendance.attendedFromAnotherGroup = true;
+      } else if (student.attendance.hasRecordedAttendance) {
+        throw new errorHandler.StudentHasRecordedAttendance();
+      } else {
+        student.absence.number--;
+        student.absence.details.shift();
+      }
+    } else {
+      throw new errorHandler.InvalidAttendanceId();
+    }
+
+    student.attendance.number++;
+    student.attendance.details.unshift(attendanceDate);
+    student.attendance.hasRecordedAttendance = true;
+
+    await student.save();
+    return student.attendance;
   }
 }
 
