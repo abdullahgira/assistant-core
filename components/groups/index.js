@@ -5,7 +5,7 @@ const { GroupService } = require('./service');
 const groupService = new GroupService();
 
 router.get('/', showAllGroupsHandler);
-router.get('/students', showAllStudentsHandler);
+router.get('/students', searchStudentsHandler);
 
 router.post('/create_group', createGroupHandler);
 
@@ -38,9 +38,9 @@ async function showAllGroupsHandler(req, res) {
   res.json(groups);
 }
 
-async function showAllStudentsHandler(req, res) {
+async function searchStudentsHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const students = await groupService.showAllStudents(token, req.query.from, req.query.to);
+  const students = await groupService.searchStudents(token, req.query.search, req.query.from, req.query.to);
   res.json(students);
 }
 
