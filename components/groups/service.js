@@ -41,6 +41,20 @@ class GroupService {
     return await groupCollection.find({ teacherId: group.teacherId, day: group.day });
   }
 
+  async groupsSettings(token) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    const {
+      attendancePayment,
+      monthlyPayment,
+      nAttendancePerMonth,
+      booksPayment,
+      nBooksPayment
+    } = await teacherCollection.findById(assistant.teacherId);
+    return { attendancePayment, monthlyPayment, nAttendancePerMonth, booksPayment, nBooksPayment };
+  }
+
   async showAllGroups(token, day) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);

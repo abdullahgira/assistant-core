@@ -32,6 +32,8 @@ router.get('/group_:groupId/reverse_pay_books/student_:studentId', reversePayBoo
 
 router.get('/student_:studentId', getStudentDetailsHandler);
 
+router.get('/settings', groupsSettingsHnadler);
+
 async function showAllGroupsHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const groups = await groupService.showAllGroups(token, req.query.day);
@@ -148,6 +150,12 @@ async function setNAttendancesPerMonthHanlder(req, res) {
   const token = req.headers['x-auth-token'];
   const status = await groupService.setNAttendancesPerMonth(token, req.body);
   res.json(status);
+}
+
+async function groupsSettingsHnadler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const settings = await groupService.groupsSettings(token);
+  res.json(settings);
 }
 
 module.exports = router;
