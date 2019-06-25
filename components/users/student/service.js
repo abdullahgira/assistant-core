@@ -43,6 +43,13 @@ class StudentService {
     await student.save();
     return student;
   }
+
+  async viewJoinedTeachers(token) {
+    const studentId = middleware.authorize(token);
+    const student = await studentCollection.findById(studentId);
+
+    return student.teachers.details;
+  }
 }
 
 exports.StudentService = StudentService;
