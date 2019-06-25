@@ -50,6 +50,17 @@ class StudentService {
 
     return student.teachers.details;
   }
+
+  async viewTeacherDetails(token, teacherId) {
+    const studentId = middleware.authorize(token);
+    const student = await studentCollection.findById(studentId);
+
+    const teacherDetails = student.teachers.details.find(t => t._id === teacherId);
+    const studentTeacherId = teacherDetails.studentTeacherId;
+
+    const studentTeacher = await studentTeacherCollection.find({ _id: studentTeacherId });
+    return studentTeacher[0];
+  }
 }
 
 exports.StudentService = StudentService;
