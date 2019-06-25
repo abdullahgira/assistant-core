@@ -3,6 +3,7 @@ const { studentTeacherCollection } = require('../studentTeacher.model');
 const generalUserErrorHandler = require('../error');
 
 const { studentCollection } = require('./model');
+const errorHandler = require('./error');
 
 exports.validateStudentExistence = async studentId => {
   const student = await studentCollection.findById(studentId);
@@ -20,4 +21,10 @@ exports.validateTeacherExistence = async teacherId => {
   const teacher = await teacherCollection.findById(teacherId);
   if (!teacher) throw new generalUserErrorHandler.InvalidUserId();
   return teacher;
+};
+
+exports.validateDublicateTeacher = (student, teacherId) => {
+  const foundTeacher = student.teachers.details.find(t => t._id === teacherId);
+  if (foundTeacher) throw new errorHandler.DoublicateEntry();
+  return;
 };
