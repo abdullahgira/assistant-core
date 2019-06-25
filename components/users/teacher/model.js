@@ -47,6 +47,11 @@ const teacherSchema = new Schema({
     ]
   },
   subject: String,
+  attendancePayment: { type: Number, default: 0 },
+  monthlyPayment: { type: Number, default: 0 },
+  nAttendancePerMonth: { type: Number, default: 0 },
+  booksPayment: { type: Number, default: 0 },
+  nBooksPayment: { type: Number, default: 0 },
   recentlyVerified: Date
 });
 
