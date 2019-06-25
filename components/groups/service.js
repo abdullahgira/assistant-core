@@ -177,8 +177,6 @@ class GroupService {
     const group = await validator.validateGroupExistence(groupId);
 
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
-    const { attendancePayment } = await teacherCollection.findById(assistant.teacherId);
-    if (!attendancePayment) throw new Error('No attendance payment is set for the group');
 
     const students = await studentTeacherCollection.find({ groupId: groupId });
     const nowDate = new Date(Date.now()).toLocaleString();
@@ -219,7 +217,7 @@ class GroupService {
 
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
-    if (group.attendance_record.details) {
+    if (!group.attendance_record.details) {
       throw new errorHandler.NotAllowed('There are no recorded attendances');
     }
 
@@ -346,6 +344,10 @@ class GroupService {
       assistant.teacherId
     );
 
+    if (!monthlyPayment || !nAttendancePerMonth || !attendancePayment) {
+      throw new errorHandler.NotAllowed('Lack of group payments info');
+    }
+
     switch (type) {
       case 'month':
         student.attendancePayment.number++;
@@ -449,13 +451,14 @@ class GroupService {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
+    const { booksPayment } = await teacherCollection.findById(assistant.teacherId);
+    if (!booksPayment) throw new errorHandler.NotAllowed('Lack of books payment information');
+
     await teacherCollection.updateMany(
       { _id: assistant.teacherId },
       { $inc: { nBooksPayment: 1 } },
       { strict: false }
     );
-
-    const { booksPayment } = await teacherCollection.findById(assistant.teacherId);
 
     await studentTeacherCollection.updateMany(
       { teacherId: assistant.teacherId },
