@@ -177,8 +177,8 @@ class GroupService {
     const group = await validator.validateGroupExistence(groupId);
 
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
-
-    if (!group.attendancePayment) throw new Error('No attendance payment is set for the group');
+    const { attendancePayment } = await teacherCollection.findById(assistant.teacherId);
+    if (!attendancePayment) throw new Error('No attendance payment is set for the group');
 
     const students = await studentTeacherCollection.find({ groupId: groupId });
     const nowDate = new Date(Date.now()).toLocaleString();
@@ -280,15 +280,15 @@ class GroupService {
 
     switch (type) {
       case 'lesson':
-        await groupCollection.updateMany(
-          { teacherId: assistant.teacherId },
+        await teacherCollection.updateMany(
+          { _id: assistant.teacherId },
           { attendancePayment: body.amount },
           { new: true, strict: false }
         );
         break;
       case 'month':
-        await groupCollection.updateMany(
-          { teacherId: assistant.teacherId },
+        await teacherCollection.updateMany(
+          { _id: assistant.teacherId },
           { monthlyPayment: body.amount },
           { new: true, strict: false }
         );
@@ -305,8 +305,8 @@ class GroupService {
     const assistant = await validator.validateAssistantExistence(assistantId);
 
     schema.nAttendancesPerMonth(body);
-    await groupCollection.updateMany(
-      { teacherId: assistant.teacherId },
+    await teacherCollection.updateMany(
+      { _id: assistant.teacherId },
       { $set: { nAttendancePerMonth: body.number } },
       { strict: false }
     );
@@ -342,25 +342,29 @@ class GroupService {
     const previousNAvailableAttendances = student.attendancePayment.nAvailableAttendances;
     const previousNUnpaidAttendances = student.attendancePayment.nUnpaidAttendances;
 
+    const { monthlyPayment, nAttendancePerMonth, attendancePayment } = await teacherCollection.findById(
+      assistant.teacherId
+    );
+
     switch (type) {
       case 'month':
         student.attendancePayment.number++;
-        student.attendancePayment.amount = group.monthlyPayment;
-        student.attendancePayment.totalPaid += group.monthlyPayment;
+        student.attendancePayment.amount = monthlyPayment;
+        student.attendancePayment.totalPaid += monthlyPayment;
 
-        if (student.attendancePayment.nUnpaidAttendances > group.nAttendancePerMonth) {
-          student.attendancePayment.nUnpaidAttendances -= group.nAttendancePerMonth;
+        if (student.attendancePayment.nUnpaidAttendances > nAttendancePerMonth) {
+          student.attendancePayment.nUnpaidAttendances -= nAttendancePerMonth;
           student.attendancePayment.nAvailableAttendances = 0;
         } else {
           student.attendancePayment.nAvailableAttendances +=
-            group.nAttendancePerMonth - student.attendancePayment.nUnpaidAttendances;
+            nAttendancePerMonth - student.attendancePayment.nUnpaidAttendances;
           student.attendancePayment.nUnpaidAttendances = 0;
         }
         break;
       case 'lesson':
         student.attendancePayment.number++;
-        student.attendancePayment.amount = group.attendancePayment;
-        student.attendancePayment.totalPaid += group.attendancePayment;
+        student.attendancePayment.amount = attendancePayment;
+        student.attendancePayment.totalPaid += attendancePayment;
         student.attendancePayment.nUnpaidAttendances--;
         break;
       default:
@@ -412,12 +416,12 @@ class GroupService {
     student.attendancePayment.nAvailableAttendances = lastPaymentDetails.previousNAvailableAttendances;
     student.attendancePayment.nUnpaidAttendances = lastPaymentDetails.previousNUnpaidAttendances;
 
-    // const remainingDays = group.nAttendancePerMonth - student.attendancePayment.nAvailableAttendances;
+    // const remainingDays = nAttendancePerMonth - student.attendancePayment.nAvailableAttendances;
     // if (remainingDays >= 0) {
     //   student.attendancePayment.nAvailableAttendances += 4;
     //   // student.attendancePayment.nUnpaidAttendances = remainingDays;
     // } else {
-    //   student.attendancePayment.nAvailableAttendances -= group.nAttendancePerMonth;
+    //   student.attendancePayment.nAvailableAttendances -= nAttendancePerMonth;
     //   student.attendancePayment.nUnpaidAttendances = 0;
     // }
 
@@ -432,8 +436,8 @@ class GroupService {
     schema.paymentAmount(body);
     validator.validateAmount(body.amount);
 
-    await groupCollection.updateMany(
-      { teacherId: assistant.teacherId },
+    await teacherCollection.updateMany(
+      { _id: assistant.teacherId },
       { booksPayment: body.amount },
       { new: true, strict: false }
     );
@@ -445,14 +449,13 @@ class GroupService {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
-    await groupCollection.updateMany(
-      { teacherId: assistant.teacherId },
+    await teacherCollection.updateMany(
+      { _id: assistant.teacherId },
       { $inc: { nBooksPayment: 1 } },
       { strict: false }
     );
 
-    const group = await groupCollection.findOne({ teacherId: assistant.teacherId });
-    const booksPayment = group.booksPayment;
+    const { booksPayment } = await teacherCollection.findById(assistant.teacherId);
 
     await studentTeacherCollection.updateMany(
       { teacherId: assistant.teacherId },
@@ -469,12 +472,10 @@ class GroupService {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
-    const group = await groupCollection.findOne({ teacherId: assistant.teacherId });
-    const booksPayment = group.booksPayment;
+    const { booksPayment, nBooksPayment } = await teacherCollection.findById(assistant.teacherId);
+    if (!nBooksPayment) throw new errorHandler.ReachedMaxReversePayValue();
 
-    if (!group.nBooksPayment) throw new errorHandler.ReachedMaxReversePayValue();
-
-    await groupCollection.updateMany({ teacherId: assistant.teacherId }, { $inc: { nBooksPayment: -1 } });
+    await teacherCollection.updateMany({ _id: assistant.teacherId }, { $inc: { nBooksPayment: -1 } });
     await studentTeacherCollection.updateMany(
       { teacherId: assistant.teacherId },
       {
@@ -496,15 +497,17 @@ class GroupService {
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
-    if (!group.booksPayment) throw new errorHandler.PaymentAmountIsUnknown('Books payment is unknown');
+    const { booksPayment } = await teacherCollection.findById(assistant.teacherId);
+
+    if (!booksPayment) throw new errorHandler.PaymentAmountIsUnknown('Books payment is unknown');
     if (!student.booksPayment.totalUnpaid)
       throw new errorHandler.PaymentIsAlreadyPaid('Already paid all the money');
 
     student.booksPayment.number++;
-    student.booksPayment.totalPaid += group.booksPayment;
-    student.booksPayment.totalUnpaid -= group.booksPayment;
+    student.booksPayment.totalPaid += booksPayment;
+    student.booksPayment.totalUnpaid -= booksPayment;
     student.booksPayment.details.unshift({
-      amount: group.booksPayment,
+      amount: booksPayment,
       date: new Date(Date.now()).toLocaleString()
     });
 
