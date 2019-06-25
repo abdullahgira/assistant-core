@@ -128,7 +128,7 @@ class GroupService {
     return { status: 200 }; // success message
   }
 
-  async showAllStudents(token, from, to) {
+  async searchStudents(token, search, from, to) {
     /**
      * @param token -> assistant json web token
      * @param from -> return students starting from student number {from}
@@ -145,7 +145,12 @@ class GroupService {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
-    const allStudents = await studentTeacherCollection.find({ teacherId: assistant.teacherId });
+    const allStudents = search
+      ? await studentTeacherCollection.find({
+          teacherId: assistant.teacherId,
+          name: new RegExp(search, 'ig')
+        })
+      : await studentTeacherCollection.find({ teacherId: assistant.teacherId });
     const maxStudentsReturn = 20;
 
     let validTo = 0;
