@@ -22,6 +22,15 @@ class InvalidType extends Error {
   }
 }
 
+class InvalidScoreId extends Error {
+  constructor(message = 'Score id is not available') {
+    super(message);
+    this.name = 'InvalidScoreId';
+    this.statusCode = 400;
+  }
+}
+
 exports.InvalidBody = InvalidBody;
 exports.InvalidScoreValue = InvalidScoreValue;
 exports.InvalidType = InvalidType;
+exports.InvalidScoreId = InvalidScoreId;

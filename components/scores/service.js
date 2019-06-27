@@ -36,7 +36,7 @@ class ScoreService {
     return { status: 200 };
   }
 
-  async addScore(token, studentId, body) {
+  async addOrEditScore(token, body, studentId, scoreId) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await groupsValidator.validateAssistantExistence(assistantId);
     const student = await groupsValidator.validateStudentExistence(studentId);
@@ -55,8 +55,25 @@ class ScoreService {
       hasGotMaxScore: body.score === maxScore
     };
 
-    student.scores.unshift(studentScore);
+    if (scoreId) {
+      const scoreIndex = student.scores.findIndex(s => String(s._id) === scoreId);
+      student.scores[scoreIndex] = studentScore;
+    } else {
+      student.scores.unshift(studentScore);
+    }
+
     await student.save();
+    return student.scores;
+  }
+
+  async deleteScore(token, studentId, scoreId) {
+    assistantMiddleware.authorize(token);
+    const student = await groupsValidator.validateStudentExistence(studentId);
+
+    const newScores = student.scores.filter(s => String(s._id) !== scoreId);
+    student.scores = newScores;
+    await student.save();
+
     return student.scores;
   }
 }
