@@ -14,5 +14,14 @@ class InvalidScoreValue extends Error {
   }
 }
 
+class InvalidType extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'InvalidType';
+    this.statusCode = 400;
+  }
+}
+
 exports.InvalidBody = InvalidBody;
 exports.InvalidScoreValue = InvalidScoreValue;
+exports.InvalidType = InvalidType;
