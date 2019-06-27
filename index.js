@@ -39,6 +39,7 @@ if (process.env.NODE_ENV !== 'production') {
 app.use('/api/users', require('./components/users'));
 app.use('/api/groups', require('./components/groups'));
 app.use('/api/posts', require('./components/posts'));
+app.use('/api/scores', require('./components/scores'));
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {

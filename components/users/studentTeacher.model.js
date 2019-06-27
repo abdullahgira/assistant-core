@@ -47,7 +47,14 @@ const studentTeacherSchema = new Schema({
     totalPaid: { type: Number, default: 0 },
     totalUnpaid: { type: Number, default: 0 },
     details: [{ amount: Number, date: String }]
-  }
+  },
+  scores: [
+    {
+      score: Number,
+      hasToMakeRedo: Boolean,
+      hasGotMaxScore: Boolean
+    }
+  ]
 });
 
 exports.studentTeacherCollection = mongoose.model('StudentTeacher', studentTeacherSchema);

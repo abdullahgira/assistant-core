@@ -52,6 +52,8 @@ const teacherSchema = new Schema({
   nAttendancePerMonth: { type: Number, default: 0 },
   booksPayment: { type: Number, default: 0 },
   nBooksPayment: { type: Number, default: 0 },
+  maxScore: { type: Number, default: 0 },
+  redoScore: { type: Number, default: 0 },
   recentlyVerified: Date
 });
 
