@@ -570,7 +570,7 @@ class GroupService {
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
-    return { student };
+    return student;
   }
 }
 
