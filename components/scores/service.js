@@ -7,6 +7,13 @@ const { teacherCollection } = require('../users/teacher/model');
 const assistantMiddleware = require('../users/assistant/middleware');
 
 class ScoreService {
+  async getScores(token, studentId) {
+    assistantMiddleware.authorize(token);
+    const student = await groupsValidator.validateStudentExistence(studentId);
+
+    return student.scores;
+  }
+
   async setMaxAndRedoScores(token, body, type) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await groupsValidator.validateAssistantExistence(assistantId);

@@ -4,13 +4,19 @@ const router = express.Router();
 const { ScoreService } = require('./service');
 const scoreService = new ScoreService();
 
-// router.get();
+router.get('/student_:studentId', getScoresHandler);
 
 router.post('/set_score', setScoreHandler);
 router.post('/add_score/student_:studentId', addScoreHandler);
 router.post('/edit_score/score_:scoreId/student_:studentId', editScoreHandler);
 
 router.delete('/delete_score/score_:scoreId/student_:studentId', deleteScoreHandler);
+
+async function getScoresHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const scores = await scoreService.getScores(token, req.params.studentId);
+  res.json(scores);
+}
 
 async function setScoreHandler(req, res) {
   const token = req.headers['x-auth-token'];
