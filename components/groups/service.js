@@ -275,7 +275,9 @@ class GroupService {
       student.attendance.attendedFromAnotherGroup = true;
     } else if (student.attendance.hasRecordedAttendance) {
       throw new errorHandler.StudentHasRecordedAttendance();
-    } else {
+    } else if (student.absence.number) {
+      // avoid students added after setting new attendance record
+      // to have absence = -1
       student.absence.number--;
       student.absence.details.shift();
     }
