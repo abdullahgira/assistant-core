@@ -204,7 +204,6 @@ class GroupService {
     group.attendance_record.number++;
     group.attendance_record.details.unshift({
       _id: attendanceId,
-      teacherId: assistant.teacherId,
       date: nowDate
     });
 
@@ -226,7 +225,7 @@ class GroupService {
     });
 
     await group.save();
-    return { _id: attendanceId, date: nowDate };
+    return { _id: attendanceId, date: nowDate, groupId };
   }
 
   async showRecentAttendanceDetails(token, groupId) {

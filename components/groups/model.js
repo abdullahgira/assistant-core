@@ -16,7 +16,7 @@ const groupSchema = new Schema({
   teacherId: String,
   attendance_record: {
     number: { type: Number, default: 0 },
-    details: [{ _id: String, teacherId: String, date: String }]
+    details: [{ _id: String, date: String }]
   },
   students: {
     number: { type: Number, default: 0 },
