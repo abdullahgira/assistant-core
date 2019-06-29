@@ -619,7 +619,7 @@ class GroupService {
     return student;
   }
 
-  async reversePayBooks(token, groupId, studentId) {
+  async reversePayBooks(token, studentId) {
     /**
      * @param token -> assistant jwt
      * @param student -> the student that will reverse the payment
@@ -629,9 +629,6 @@ class GroupService {
 
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
-
-    const group = await validator.validateGroupExistence(groupId);
-    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
