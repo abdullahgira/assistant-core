@@ -332,10 +332,9 @@ class GroupService {
     return { status: 200 };
   }
 
-  async payAttendance(token, groupId, studentId, type) {
+  async payAttendance(token, studentId, type) {
     /**
      * @param token -> json web token
-     * @param groupId -> the group id at wich the attendance will be recorded
      * @param studentId -> the id of the student that will record attendance
      * @returns the update student info.
      *
@@ -348,10 +347,6 @@ class GroupService {
     //  authorizing and validating the token to be of an assistant
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
-
-    // validating groupId
-    const group = await validator.validateGroupExistence(groupId);
-    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
     // validating studentId and that he is with the same teacher as the assistant
     const student = await validator.validateStudentExistence(studentId);
@@ -404,7 +399,7 @@ class GroupService {
     return student;
   }
 
-  async reversePayAttendance(token, groupId, studentId) {
+  async reversePayAttendance(token, studentId) {
     /**
      * @param token -> json web token
      * @param groupId -> the group id at wich the attendance will be recorded
@@ -418,9 +413,6 @@ class GroupService {
      */
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
-
-    const group = await validator.validateGroupExistence(groupId);
-    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
@@ -510,12 +502,9 @@ class GroupService {
     return { status: 200 };
   }
 
-  async payBooks(token, groupId, studentId) {
+  async payBooks(token, studentId) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
-
-    const group = await validator.validateGroupExistence(groupId);
-    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);

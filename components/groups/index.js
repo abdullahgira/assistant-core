@@ -24,11 +24,11 @@ router.post('/set_number_of_attendances_per_month', setNAttendancesPerMonthHanld
 router.get('/take_books_payment', takeBooksPaymentHandler);
 router.get('/reverse_take_books_payment', reverseTakeBooksPaymentHandler);
 
-router.get('/group_:groupId/pay_attendance/student_:studentId', payAttendanceHandler); // uses url query to determine lesson or month payment
-router.get('/group_:groupId/reverse_pay_attendance/student_:studentId', reversePayAttendanceHandler);
+router.get('/pay_attendance/student_:studentId', payAttendanceHandler); // uses url query to determine lesson or month payment
+router.get('/reverse_pay_attendance/student_:studentId', reversePayAttendanceHandler);
 
-router.get('/group_:groupId/pay_books/student_:studentId', payBooksHandler);
-router.get('/group_:groupId/reverse_pay_books/student_:studentId', reversePayBooksHandler);
+router.get('/pay_books/student_:studentId', payBooksHandler);
+router.get('/reverse_pay_books/student_:studentId', reversePayBooksHandler);
 
 router.get('/student_:studentId', getStudentDetailsHandler);
 
@@ -83,30 +83,25 @@ async function recordAttendanceHandler(req, res) {
 
 async function payAttendanceHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const student = await groupService.payAttendance(
-    token,
-    req.params.groupId,
-    req.params.studentId,
-    req.query.type
-  );
+  const student = await groupService.payAttendance(token, req.params.studentId, req.query.type);
   res.json(student);
 }
 
 async function reversePayAttendanceHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const student = await groupService.reversePayAttendance(token, req.params.groupId, req.params.studentId);
+  const student = await groupService.reversePayAttendance(token, req.params.studentId);
   res.json(student);
 }
 
 async function payBooksHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const student = await groupService.payBooks(token, req.params.groupId, req.params.studentId);
+  const student = await groupService.payBooks(token, req.params.studentId);
   res.json(student);
 }
 
 async function reversePayBooksHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const student = await groupService.reversePayBooks(token, req.params.groupId, req.params.studentId);
+  const student = await groupService.reversePayBooks(token, req.params.studentId);
   res.json(student);
 }
 
