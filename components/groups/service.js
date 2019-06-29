@@ -239,7 +239,7 @@ class GroupService {
       throw new errorHandler.NotAllowed('There are no recorded attendances');
     }
 
-    return group.attendance_record.details[0];
+    return group.attendance_record.details[0] || {};
   }
 
   async recordAttendance(token, groupId, studentId) {
