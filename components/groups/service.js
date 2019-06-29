@@ -286,7 +286,7 @@ class GroupService {
     student.attendance.hasRecordedAttendance = true;
 
     await student.save();
-    return { student };
+    return student;
   }
 
   async setAttendancePaymentAmount(token, body, type) {
@@ -401,7 +401,7 @@ class GroupService {
     });
 
     await student.save();
-    return { student };
+    return student;
   }
 
   async reversePayAttendance(token, groupId, studentId) {
@@ -448,7 +448,7 @@ class GroupService {
     // }
 
     await student.save();
-    return { student };
+    return student;
   }
 
   async setBooksPayment(token, body) {
@@ -535,7 +535,7 @@ class GroupService {
     });
 
     await student.save();
-    return { student };
+    return student;
   }
 
   async reversePayBooks(token, groupId, studentId) {
@@ -559,7 +559,7 @@ class GroupService {
     student.booksPayment.totalUnpaid += lastPaymentDetails.amount;
 
     await student.save();
-    return { student };
+    return student;
   }
 
   async getStudentDetails(token, studentId) {
