@@ -11,6 +11,15 @@ const assistantMiddleware = require('../users/assistant/middleware');
 
 class GroupService {
   async createGroup(body, token) {
+    /**
+     * @param token -> assistant jwt
+     * @param body -> new group name and day
+     * @returns all the groups of the same day
+     *
+     * Creates a new group with the given day and make sure
+     * there are no duplicate group names in the same day
+     */
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
@@ -42,6 +51,11 @@ class GroupService {
   }
 
   async groupsSettings(token) {
+    /**
+     * @param token -> assistant jwt
+     * @returns all group's payment information
+     */
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
@@ -56,6 +70,13 @@ class GroupService {
   }
 
   async showAllGroups(token, day) {
+    /**
+     * @param token -> assistant jwt
+     * @param day -> groups day
+     * @returns a list of all groups at the given day, if no day or
+     * invalid day was given it returns []
+     */
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
@@ -70,6 +91,15 @@ class GroupService {
   }
 
   async addStudent(body, token, groupId) {
+    /**
+     * @param token -> assistant jwt.
+     * @param body -> new studen name, phone and address are expected.
+     * @param groupId -> the group at which the student will be added.
+     * @returns the teacherId and the code of the new student
+     * @throws if invalid body properties were found, invalid token,
+     * invalid groupId or a group that can't be modified by the assistant.
+     */
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
     const group = await validator.validateGroupExistence(groupId);
@@ -107,6 +137,13 @@ class GroupService {
   }
 
   async removeStudent(body, token, groupId, studentId) {
+    /**
+     * @param token -> assistant jwt
+     * @param groupId -> the group in which the student will be removed
+     * @param studentId -> the student that will be deleted
+     * @returns {status: 200}
+     */
+
     // TODO: Access student db when implemented and remove that teacher
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
@@ -133,6 +170,7 @@ class GroupService {
      * @param token -> assistant json web token
      * @param from -> return students starting from student number {from}
      * @param to -> return students up to student number {to}
+     * @returns an array of the found students
      *
      * Takes from, to or none of them, if from was given and to was not it will return
      * starting from student {from} up to student {from + 20}, if to was given and to was bigger
@@ -140,8 +178,8 @@ class GroupService {
      * to student number {to}
      *
      * If any invaild value was passed, from will be reset to 0 and to will be reset to 20
-     *
      */
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
@@ -179,7 +217,7 @@ class GroupService {
      * @param token -> json web token
      * @param groupId -> the group id that will have a new attendance record
      *
-     * New attendance records are saved to the Group table with a unique id, teacher id
+     * New attendance records are saved to the Group table with a unique id
      * and the current date.
      *
      * New attendace is recorded for each student by incrementing his absence, adding the current
@@ -187,10 +225,11 @@ class GroupService {
      * if the student came from anoter group, we only set attendedFromAnotherGroup to false
      * and do nothing else.
      *
-     * For payments, the totalUnpaid property in the student.attendancePayment is incremented by
-     * the attendance payment amount from the group
-     *
+     * Payments
+     * if there are availabe attendances remaining the will be decremented,
+     * else the un paid attendances will be incremented.
      */
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
     const group = await validator.validateGroupExistence(groupId);
@@ -229,6 +268,12 @@ class GroupService {
   }
 
   async showRecentAttendanceDetails(token, groupId) {
+    /**
+     * @param token -> assistant jwt
+     * @param groupId -> the group that will return the latest attendance details
+     * @returns the last attendance details if found else retuns {}
+     */
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
     const group = await validator.validateGroupExistence(groupId);
@@ -247,6 +292,7 @@ class GroupService {
      * @param token -> json web token
      * @param groupId -> the group id at wich the attendance will be recorded
      * @param studentId -> the id of the student that will record attendance
+     * @returns the student after attendance has been recorded
      *
      * It checks if the student is from the same group, if the student is from another group,
      * it sets attendedFromAnotherGroup to true, and doesn't delete the latest recorded absence,
@@ -257,8 +303,8 @@ class GroupService {
      * For both students, a new attendance record is added to them and a hasRecordedAttendance
      * property is set to true to prevent more than one attendance record for the same student,
      * this property is reset when a new attendance record is requested.
-     *
      */
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
@@ -290,6 +336,16 @@ class GroupService {
   }
 
   async setAttendancePaymentAmount(token, body, type) {
+    /**
+     * @param token -> assistant jwt
+     * @param body -> amount is expected
+     * @param type -> the type of the payment to be set (can only be lesson or month)
+     * @returns {status: 200}
+     * @throws if the type is invalid
+     *
+     * Sets the monthly attendance payment and the lesson attendance payments
+     */
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
@@ -319,6 +375,15 @@ class GroupService {
   }
 
   async setNAttendancesPerMonth(token, body) {
+    /**
+     * @param token -> assistant jwt
+     * @param body -> number is expected
+     * @returns { status: 200 }
+     *
+     * Sets the number of attendances for each month before a new payment
+     * is required from the student
+     */
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
@@ -341,7 +406,6 @@ class GroupService {
      * Increments attendancePyament number for student and add the current date
      * to the details of the payment, this method can be called as many times as needed
      * and should be reversed by reversePayAttendance.
-     *
      */
 
     //  authorizing and validating the token to be of an assistant
@@ -402,15 +466,14 @@ class GroupService {
   async reversePayAttendance(token, studentId) {
     /**
      * @param token -> json web token
-     * @param groupId -> the group id at wich the attendance will be recorded
      * @param studentId -> the id of the student that will record attendance
      * @returns the updated student info
      *
      * Decrement attendancePyament number for student and remove the last
-     * payment details, this method will throw an error if it is fired and there is 0
+     * payment details, this method will throw an error if it is called and there is 0
      * attendancePayment.
-     *
      */
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
@@ -444,6 +507,14 @@ class GroupService {
   }
 
   async setBooksPayment(token, body) {
+    /**
+     * @param token -> assistant jwt
+     * @param body -> amound is expected
+     * @returns { status: 200 }
+     *
+     * Sets books payment for all the groups
+     */
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
@@ -460,6 +531,13 @@ class GroupService {
   }
 
   async takeBooksPayment(token) {
+    /**
+     * @param token -> assistant jwt
+     * @returns { status: 200 }
+     * @throws if the books payment is not set
+     * Takes the books payment from all the students
+     */
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
@@ -484,6 +562,12 @@ class GroupService {
   }
 
   async reverseTakeBooksPayment(token) {
+    /**
+     * @param token -> assistant jwt
+     *
+     * Reverses the take bookse payment action.
+     */
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
@@ -503,6 +587,14 @@ class GroupService {
   }
 
   async payBooks(token, studentId) {
+    /**
+     * @param token -> assistant jwt
+     * @param studentId -> the studen that will pay the books
+     *
+     * books payment number is incremented and the payment date is
+     * added to the details
+     */
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
@@ -528,6 +620,13 @@ class GroupService {
   }
 
   async reversePayBooks(token, groupId, studentId) {
+    /**
+     * @param token -> assistant jwt
+     * @param student -> the student that will reverse the payment
+     *
+     * Decrements the books payment and remove the last book payment details
+     */
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
@@ -552,6 +651,12 @@ class GroupService {
   }
 
   async getStudentDetails(token, studentId) {
+    /**
+     * @param token -> assistant jwt
+     * @param student -> the student that will reverse the payment
+     * @returns all the information the assistant knows about the student
+     */
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 

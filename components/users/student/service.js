@@ -52,6 +52,7 @@ class StudentService {
   async viewJoinedTeachers(token) {
     const studentId = middleware.authorize(token);
     const student = await studentCollection.findById(studentId);
+    // TODO scan token legibelity
 
     return student.teachers.details;
   }
