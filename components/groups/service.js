@@ -103,7 +103,7 @@ class GroupService {
     await teacher.save();
     await studentTeacher.save();
 
-    return { code };
+    return { code, teacherId: teacher._id };
   }
 
   async removeStudent(body, token, groupId, studentId) {
