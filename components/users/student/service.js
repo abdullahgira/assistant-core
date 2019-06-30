@@ -31,7 +31,7 @@ class StudentService {
     const { error } = schema.joinTeacher(body);
     if (error) throw new generalErrorHandler.ValidationError(error.details[0].message);
 
-    const student = await studentCollection.findById(studentId);
+    const student = await validator.validateStudentExistence(studentId);
     const teacher = await teacherCollection.findById(body.teacherId);
     const studentTeacher = await studentTeacherCollection.findById(body.code);
 
@@ -51,8 +51,7 @@ class StudentService {
 
   async viewJoinedTeachers(token) {
     const studentId = middleware.authorize(token);
-    const student = await studentCollection.findById(studentId);
-    // TODO scan token legibelity
+    const student = await validator.validateStudentExistence(studentId);
 
     return student.teachers.details;
   }

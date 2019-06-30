@@ -7,10 +7,10 @@ const scoreService = new ScoreService();
 router.get('/student_:studentId', getScoresHandler);
 
 router.post('/set_score', setScoreHandler);
-router.post('/add_score/student_:studentId', addScoreHandler);
-router.post('/edit_score/score_:scoreId/student_:studentId', editScoreHandler);
+router.post('/add_score/group_:groupId/student_:studentId', addScoreHandler);
+router.post('/edit_score/group_:groupId/student_:studentId/score_:scoreId', editScoreHandler);
 
-router.delete('/delete_score/score_:scoreId/student_:studentId', deleteScoreHandler);
+router.delete('/delete_score/group_:groupId/student_:studentId/score_:scoreId', deleteScoreHandler);
 
 async function getScoresHandler(req, res) {
   const token = req.headers['x-auth-token'];
@@ -26,15 +26,16 @@ async function setScoreHandler(req, res) {
 
 async function addScoreHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const newScore = await scoreService.addOrEditScore(token, req.body, req.params.studentId);
+  const newScore = await scoreService.addScore(token, req.body, req.params.groupId, req.params.studentId);
   res.json(newScore);
 }
 
 async function editScoreHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const newScore = await scoreService.addOrEditScore(
+  const newScore = await scoreService.editScore(
     token,
     req.body,
+    req.params.groupId,
     req.params.studentId,
     req.params.scoreId
   );
@@ -43,7 +44,12 @@ async function editScoreHandler(req, res) {
 
 async function deleteScoreHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const newScores = await scoreService.deleteScore(token, req.params.studentId, req.params.scoreId);
+  const newScores = await scoreService.deleteScore(
+    token,
+    req.params.groupId,
+    req.params.studentId,
+    req.params.scoreId
+  );
   res.json(newScores);
 }
 
