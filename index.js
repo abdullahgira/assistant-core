@@ -26,14 +26,12 @@ app.use(bodyParser.json());
 app.disable('etag');
 app.disable('x-powered-by');
 
-if (process.env.NODE_ENV !== 'production') {
-  app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', '*');
-    res.header('Access-Control-Expose-Headers', 'x-auth-token');
-    next();
-  });
-}
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', '*');
+  res.header('Access-Control-Expose-Headers', 'x-auth-token');
+  next();
+});
 
 // routes
 app.use('/api/users', require('./components/users'));
