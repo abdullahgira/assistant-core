@@ -237,13 +237,13 @@ class GroupService {
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
     const students = await studentTeacherCollection.find({ groupId: groupId });
-    const nowDate = new Date(Date.now()).toLocaleString();
+    const nowDate = new Date(Date.now()).toLocaleString().split(' ')[0];
     const attendanceId = shortid.generate();
 
     group.attendance_record.number++;
     group.attendance_record.details.unshift({
       _id: attendanceId,
-      date: nowDate
+      date: nowDate // returning the date only
     });
 
     students.forEach(async s => {
@@ -314,7 +314,7 @@ class GroupService {
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
-    const attendanceDate = new Date(Date.now()).toLocaleString();
+    const attendanceDate = new Date(Date.now()).toLocaleString().split(' ')[0];
 
     if (student.groupId !== groupId) {
       student.attendance.attendedFromAnotherGroup = true;
@@ -456,7 +456,7 @@ class GroupService {
       amount: student.attendancePayment.amount,
       previousNAvailableAttendances,
       previousNUnpaidAttendances,
-      date: new Date(Date.now()).toLocaleString()
+      date: new Date(Date.now()).toLocaleString().split(' ')[0]
     });
 
     await student.save();
@@ -612,7 +612,7 @@ class GroupService {
     student.booksPayment.totalUnpaid -= booksPayment;
     student.booksPayment.details.unshift({
       amount: booksPayment,
-      date: new Date(Date.now()).toLocaleString()
+      date: new Date(Date.now()).toLocaleString().split(' ')[0]
     });
 
     await student.save();
