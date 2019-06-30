@@ -52,7 +52,8 @@ const studentTeacherSchema = new Schema({
     {
       score: Number,
       hasToMakeRedo: Boolean,
-      hasGotMaxScore: Boolean
+      hasGotMaxScore: Boolean,
+      date: String
     }
   ]
 });

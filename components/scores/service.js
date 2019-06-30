@@ -59,7 +59,8 @@ class ScoreService {
     const studentScore = {
       score: body.score,
       hasToMakeRedo: body.score <= redoScore,
-      hasGotMaxScore: body.score === maxScore
+      hasGotMaxScore: body.score === maxScore,
+      date: new Date(Date.now()).toLocaleString()
     };
 
     if (scoreId) {
