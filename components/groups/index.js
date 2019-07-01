@@ -5,34 +5,40 @@ const { GroupService } = require('./service');
 const groupService = new GroupService();
 
 router.get('/', showAllGroupsHandler);
-router.get('/students', searchStudentsHandler);
-
 router.post('/create_group', createGroupHandler);
 
+// student
 router.post('/group_:id/add_student', addStudentHandler);
 router.delete('/group_:groupId/students/student_:studentId', removeStudentHandler);
+router.get('/students', searchStudentsHandler);
 
+// attendance
 router.get('/group_:groupId/set_new_attendance_record', setNewAttendanceRecordHandler);
 router.get('/group_:groupId/record_attendance/student_:studentId', recordAttendanceHandler);
 router.get('/group_:groupId/show_recent_attendance_details', showRecentAttendanceDetailsHandler);
 router.get('/group_:groupId/students', showAbsentStudentsHandler);
 
+// setting payment amount for books and attendance, and number of attendances per month
 router.post('/set_attendance_payment', setAttendancePaymentHandler); // handles month and lesson using the type query
 router.post('/set_books_payment', setBooksPaymentHandler);
-
 router.post('/set_number_of_attendances_per_month', setNAttendancesPerMonthHanlder);
 
+// books payment
 router.get('/take_books_payment', takeBooksPaymentHandler);
 router.get('/reverse_take_books_payment', reverseTakeBooksPaymentHandler);
 
+// attendance payment
 router.get('/pay_attendance/student_:studentId', payAttendanceHandler); // uses url query to determine lesson or month payment
 router.get('/reverse_pay_attendance/student_:studentId', reversePayAttendanceHandler);
 
+// studnet books payment
 router.get('/pay_books/student_:studentId', payBooksHandler);
 router.get('/reverse_pay_books/student_:studentId', reversePayBooksHandler);
 
+// student details
 router.get('/student_:studentId', getStudentDetailsHandler);
 
+// group settings
 router.get('/settings', groupsSettingsHnadler);
 
 async function showAllGroupsHandler(req, res) {
@@ -53,6 +59,7 @@ async function createGroupHandler(req, res) {
   res.json(group);
 }
 
+// student
 async function addStudentHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const code = await groupService.addStudent(req.body, token, req.params.id);
