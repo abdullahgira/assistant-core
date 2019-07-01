@@ -338,6 +338,23 @@ class GroupService {
     return student;
   }
 
+  async showAbsentStudents(token, groupId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    const allGroupStudents = await studentTeacherCollection.find({
+      teacherId: assistant.teacherId,
+      groupId,
+      'attendance.hasRecordedAttendance': false
+    });
+    const studentsDetails = allGroupStudents.map(s => ({
+      name: s.name,
+      hasRecordedAttendance: s.attendance.hasRecordedAttendance
+    }));
+
+    return studentsDetails;
+  }
+
   async setAttendancePaymentAmount(token, body, type) {
     /**
      * @param token -> assistant jwt
