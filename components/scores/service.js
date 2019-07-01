@@ -164,7 +164,7 @@ class ScoreService {
 
     const scoreIndex = student.scores.findIndex(s => String(s._id) === scoreId);
     if (scoreIndex !== -1) {
-      student.scores[scoreIndex] = { ...studentScore, date: student.scores[scoreIndex].date };
+      student.scores[scoreIndex] = { _id: scoreId, ...studentScore, date: student.scores[scoreIndex].date };
     } else {
       throw new errorHandler.InvalidScoreId();
     }
