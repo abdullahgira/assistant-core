@@ -23,7 +23,7 @@ class NoTokenProvided extends Error {
 }
 
 class InvalidToken extends Error {
-  constructor(message = 'Invalid token was provided') {
+  constructor(message = 'Invalid auth token') {
     super(message);
     this.name = 'InvalidToken';
     this.statusCode = 400;
@@ -31,7 +31,7 @@ class InvalidToken extends Error {
 }
 
 class InvalidUserId extends Error {
-  constructor(message = 'Invalid id was provided') {
+  constructor(message = 'Invalid user id') {
     super(message);
     this.name = 'InvalidUserId';
     this.statusCode = 400;
