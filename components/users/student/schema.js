@@ -28,10 +28,6 @@ function register(user) {
 
 function joinTeacher(body) {
   const schema = {
-    teacherId: Joi.string()
-      .min(9)
-      .max(9)
-      .required(),
     code: Joi.string()
       .min(9)
       .max(9)
