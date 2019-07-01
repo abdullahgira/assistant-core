@@ -348,8 +348,8 @@ class GroupService {
       'attendance.hasRecordedAttendance': false
     });
     const studentsDetails = allGroupStudents.map(s => ({
-      name: s.name,
-      hasRecordedAttendance: s.attendance.hasRecordedAttendance
+      _id: s._id,
+      name: s.name
     }));
 
     return studentsDetails;
