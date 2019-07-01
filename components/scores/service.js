@@ -15,6 +15,31 @@ class ScoreService {
     return student.scores;
   }
 
+  async scoresDates(token, groupId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
+
+    const group = await groupsValidator.validateGroupExistence(groupId);
+    groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
+
+    const attendanceDetails = group.attendance_record.details.map(a => a.date);
+    const uniqueAttendanceDates = attendanceDetails.filter((v, i) => attendanceDetails.indexOf(v) === i);
+
+    return uniqueAttendanceDates;
+  }
+
+  async getScoresBasedOnDate(token, groupId, date) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
+
+    const group = await groupsValidator.validateGroupExistence(groupId);
+    groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
+
+    const students = await studentTeacherCollection.find({ 'scores.date': date });
+    const studentsScores = students.map(s => ({ _id: s._id, name: s.name, score: s.scores[0] }));
+    return studentsScores;
+  }
+
   async getLastAttendedStudents(token, groupId) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await groupsValidator.validateAssistantExistence(assistantId);
