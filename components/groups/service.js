@@ -248,6 +248,16 @@ class GroupService {
     return students;
   }
 
+  async showGroupStudents(token, groupId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+    const group = await validator.validateGroupExistence(groupId);
+
+    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
+    const students = await studentTeacherCollection.find({ groupId }).sort({ studentNumber: 1 });
+    return students;
+  }
+
   async setNewAttendanceRecord(token, groupId) {
     /**
      * @param token -> json web token
