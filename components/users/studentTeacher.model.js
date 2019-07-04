@@ -13,10 +13,10 @@ const studentTeacherSchema = new Schema({
     minlength: 4,
     maxlength: 50
   },
-  phone: {
-    type: String,
-    default: ''
-  },
+  phone: { type: String, required: true, default: '' },
+  parentPhone: { type: String, required: true, default: '' },
+  address: { type: String, required: true },
+  studentNumber: { type: String, required: true },
   attendance: {
     number: { type: Number, default: 0 },
     attendedFromAnotherGroup: Boolean,
