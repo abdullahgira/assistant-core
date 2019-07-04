@@ -194,11 +194,12 @@ class GroupService {
     group.students.number--;
     group.students.details = group.students.details.filter(s => s._id !== studentId);
 
-    const student = await studentCollection.find({ 'teachers.details.studentTeacherId': studentId });
+    const student = await studentCollection.findOne({ 'teachers.details.studentTeacherId': studentId });
     student.teachers.number--;
     student.teachers.details = student.teachers.details.filter(t => t._id !== teacher._id);
 
     await studentTeacherCollection.deleteOne({ _id: studentId });
+
     await student.save();
     await group.save();
     await teacher.save();
