@@ -6,6 +6,7 @@ const groupService = new GroupService();
 
 router.get('/', showAllGroupsHandler);
 router.post('/create_group', createGroupHandler);
+router.delete('/group_:groupId', deleteGroupHandler);
 
 // student
 router.post('/group_:id/add_student', addStudentHandler);
@@ -57,6 +58,12 @@ async function createGroupHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const group = await groupService.createGroup(req.body, token);
   res.json(group);
+}
+
+async function deleteGroupHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const status = await groupService.deleteGroup(token, req.params.groupId);
+  res.json(status);
 }
 
 // student

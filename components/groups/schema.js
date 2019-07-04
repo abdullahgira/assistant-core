@@ -33,9 +33,7 @@ function addStudent(body) {
       .min(10)
       .max(150)
       .required(),
-    studentNumber: Joi.string()
-      .max(20)
-      .required()
+    studentNumber: Joi.string().max(20)
   };
   return Joi.validate(body, schema);
 }

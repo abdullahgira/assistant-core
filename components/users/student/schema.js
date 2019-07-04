@@ -29,8 +29,8 @@ function register(user) {
 function joinTeacher(body) {
   const schema = {
     code: Joi.string()
-      .min(9)
-      .max(9)
+      .min(6)
+      .max(25)
       .required()
   };
   return Joi.validate(body, schema);

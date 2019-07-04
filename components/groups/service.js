@@ -6,6 +6,7 @@ const validator = require('./validator');
 const { groupCollection } = require('./model');
 
 const { teacherCollection } = require('../users/teacher/model');
+const { studentCollection } = require('../users/student/model');
 const { studentTeacherCollection } = require('../users/studentTeacher.model');
 const assistantMiddleware = require('../users/assistant/middleware');
 
@@ -88,6 +89,38 @@ class GroupService {
     } else {
       return [];
     }
+  }
+
+  async deleteGroup(token, groupId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+    const group = await validator.validateGroupExistence(groupId);
+
+    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
+
+    const teacher = await teacherCollection.findById(assistant.teacherId);
+
+    teacher.groups.number--;
+    const newGroups = teacher.groups.details.filter(g => String(g._id) !== groupId);
+    teacher.groups.details = newGroups;
+
+    // deleting student teacher db and removing that teacher from each student
+    group.students.details.forEach(async s => {
+      await studentTeacherCollection.findByIdAndDelete(s._id);
+    });
+
+    const students = await studentCollection.find({ 'teachers.details.groupId': groupId });
+    students.forEach(async s => {
+      s.teachers.number--;
+      s.teachers.details = s.teachers.details.filter(t => t._id !== teacher._id);
+      console.log(s.teachers);
+      await s.save();
+    });
+
+    // delete group from groupsCollection
+    await groupCollection.findByIdAndDelete(groupId);
+    await teacher.save();
+    return { status: 200 };
   }
 
   async addStudent(body, token, groupId) {
