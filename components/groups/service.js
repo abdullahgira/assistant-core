@@ -118,7 +118,10 @@ class GroupService {
       teacherId: teacher._id,
       groupId: groupId,
       name: body.name,
-      phone: body.phone
+      phone: body.phone,
+      parentPhone: body.parentPhone,
+      address: body.address,
+      studentNumber: body.studentNumber
     });
 
     // adding the new student to the teacher db

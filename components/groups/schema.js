@@ -20,8 +20,21 @@ function addStudent(body) {
       .max(50)
       .required(),
     phone: Joi.string()
+      .regex(/^\+?[0-9]+/)
       .min(11)
       .max(13)
+      .required(),
+    parentPhone: Joi.string()
+      .regex(/^\+?[0-9]+/)
+      .min(11)
+      .max(13)
+      .required(),
+    address: Joi.string()
+      .min(10)
+      .max(150)
+      .required(),
+    studentNumber: Joi.string()
+      .max(20)
       .required()
   };
   return Joi.validate(body, schema);
