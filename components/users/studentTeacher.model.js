@@ -16,7 +16,7 @@ const studentTeacherSchema = new Schema({
   phone: { type: String, default: '' },
   parentPhone: { type: String, default: '' },
   address: { type: String },
-  studentNumber: { type: String },
+  studentNumber: { type: String, default: '' },
   attendance: {
     number: { type: Number, default: 0 },
     attendedFromAnotherGroup: Boolean,
