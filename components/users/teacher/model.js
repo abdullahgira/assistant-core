@@ -54,6 +54,7 @@ const teacherSchema = new Schema({
   nBooksPayment: { type: Number, default: 0 },
   maxScore: { type: Number, default: 0 },
   redoScore: { type: Number, default: 0 },
+  takeMoneyOnAbsence: { type: Boolean, defaul: false },
   recentlyVerified: Date
 });
 
