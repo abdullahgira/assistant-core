@@ -790,6 +790,40 @@ class GroupService {
 
     return student;
   }
+
+  async changeGroup(token, fromGroupId, toGroupId, studentId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    const fromGroup = await validator.validateGroupExistence(fromGroupId);
+    const toGroup = await validator.validateGroupExistence(toGroupId);
+    validator.validateGroupCanBeModifiedByAssistant(fromGroup, assistant);
+    validator.validateGroupCanBeModifiedByAssistant(toGroup, assistant);
+
+    const student = await validator.validateStudentExistence(studentId);
+    validator.validateStudentCanBeModifiedByAssistant(student, assistant);
+
+    for (let i = 0; i < fromGroup.students.details.length; i++) {
+      if (fromGroup.students.details[i]._id === studentId) {
+        fromGroup.students.details.splice(i, 1);
+        fromGroup.students.number--;
+        break;
+      } else if (i === fromGroup.students.details.length - 1) {
+        throw new errorHandler.StudentIsNotInGroup();
+      }
+    }
+
+    toGroup.students.number++;
+    toGroup.students.details.push({ _id: studentId, name: student.name });
+
+    student.groupId = toGroup._id;
+
+    await fromGroup.save();
+    await toGroup.save();
+    await student.save();
+
+    return student;
+  }
 }
 
 exports.GroupService = GroupService;
