@@ -594,6 +594,7 @@ class GroupService {
       .sort({ studentNumber: 1 });
 
     let result = {
+      overallPayment: 0,
       totalAttendancePayment: 0,
       totalBooksPayment: 0,
       details: []
@@ -628,6 +629,7 @@ class GroupService {
       });
     }
 
+    result.overallPayment = result.totalAttendancePayment + result.totalBooksPayment;
     return result;
   }
 
