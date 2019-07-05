@@ -803,8 +803,6 @@ class GroupService {
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
-    console.log(fromGroupId, toGroupId);
-
     for (let i = 0; i < fromGroup.students.details.length; i++) {
       if (fromGroup.students.details[i]._id === studentId) {
         fromGroup.students.details.splice(i, 1);
