@@ -45,6 +45,9 @@ router.get('/student_:studentId', getStudentDetailsHandler);
 // group settings
 router.get('/settings', groupsSettingsHnadler);
 
+// switch groups
+router.get('/change_group/group_:fromGroupId/group_:toGroupId/student_:studentId', changeGroupHandler);
+
 async function showAllGroupsHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const groups = await groupService.showAllGroups(token, req.query.day);
@@ -187,6 +190,17 @@ async function showAbsentStudentsHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const students = await groupService.showAbsentStudents(token, req.params.groupId);
   res.json(students);
+}
+
+async function changeGroupHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const student = await groupService.changeGroup(
+    token,
+    req.params.fromGroupId,
+    req.params.toGroupId,
+    req.params.studentId
+  );
+  res.json(student);
 }
 
 module.exports = router;

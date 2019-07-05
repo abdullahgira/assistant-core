@@ -86,6 +86,14 @@ class NotAllowed extends Error {
   }
 }
 
+class StudentIsNotInGroup extends Error {
+  constructor(message = 'Student is not in the group') {
+    super(message);
+    this.name = 'StudentIsNotInGroup';
+    this.statusCode = 400;
+  }
+}
+
 exports.GroupCreationError = GroupCreationError;
 exports.InvalidGroupId = InvalidGroupId;
 exports.DoublicateEntry = DoublicateEntry;
@@ -97,3 +105,4 @@ exports.InvalidPaymentType = InvalidPaymentType;
 exports.PaymentAmountIsUnknown = PaymentAmountIsUnknown;
 exports.PaymentIsAlreadyPaid = PaymentIsAlreadyPaid;
 exports.NotAllowed = NotAllowed;
+exports.StudentIsNotInGroup = StudentIsNotInGroup;
