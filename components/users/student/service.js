@@ -35,7 +35,10 @@ class StudentService {
     const studentTeacher = await validator.validateStudentTeacherExistence(body.code);
     const teacher = await teacherCollection.findById(studentTeacher.teacherId);
 
+    // validate student is not with teacher, and that the studentTeacher document is
+    // not with another student
     validator.validateDublicateTeacher(student, teacher._id);
+    validator.validateStudentTeacherIsNotWithAnotherStudentd(studentTeacher);
 
     const { _id: studentTeacherId, teacherId, groupId } = studentTeacher;
 

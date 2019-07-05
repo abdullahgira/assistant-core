@@ -28,3 +28,8 @@ exports.validateDublicateTeacher = (student, teacherId) => {
   if (foundTeacher) throw new errorHandler.DoublicateEntry();
   return;
 };
+
+exports.validateStudentTeacherIsNotWithAnotherStudent = studentTeacher => {
+  if (studentTeacher.studentId) throw new errorHandler.DoublicateEntry('Code is used by another student!');
+  return;
+};
