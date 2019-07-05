@@ -624,6 +624,7 @@ class GroupService {
 
       result.details.push({
         name: student.name,
+        studentNumber: student.studentNumber,
         attendancePayment: studetTotalAttendancePayment,
         booksPayment: studetTotalBooksPayment
       });
