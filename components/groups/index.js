@@ -37,6 +37,8 @@ router.get('/reverse_pay_attendance/student_:studentId', reversePayAttendanceHan
 router.get('/pay_books/student_:studentId', payBooksHandler);
 router.get('/reverse_pay_books/student_:studentId', reversePayBooksHandler);
 
+router.get('/group_:groupId/total_payments', showTodayGroupPaymentHandler);
+
 // student details
 router.get('/student_:studentId', getStudentDetailsHandler);
 
@@ -125,6 +127,12 @@ async function reversePayBooksHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const student = await groupService.reversePayBooks(token, req.params.studentId);
   res.json(student);
+}
+
+async function showTodayGroupPaymentHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const groupPayment = await groupService.showTodayGroupPayment(token, req.params.groupId);
+  res.json(groupPayment);
 }
 
 async function getStudentDetailsHandler(req, res) {

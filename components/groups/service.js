@@ -577,6 +577,60 @@ class GroupService {
     return student;
   }
 
+  async showTodayGroupPayment(token, groupId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    const group = await validator.validateGroupExistence(groupId);
+    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
+
+    const nowDate = new Date(Date.now()).toLocaleString().split(' ')[0];
+
+    const payments = await studentTeacherCollection
+      .find({
+        groupId,
+        $or: [{ 'attendancePayment.details.date': nowDate }, { 'booksPayment.details.date': nowDate }]
+      })
+      .sort({ studentNumber: 1 });
+
+    let result = {
+      totalAttendancePayment: 0,
+      totalBooksPayment: 0,
+      details: []
+    };
+
+    for (let student of payments) {
+      let studetTotalAttendancePayment = 0;
+      let studetTotalBooksPayment = 0;
+
+      if (student.attendancePayment.details) {
+        for (let attendancePaymentDetail of student.attendancePayment.details) {
+          if (attendancePaymentDetail.date === nowDate) {
+            result.totalAttendancePayment += attendancePaymentDetail.amount;
+            studetTotalAttendancePayment += attendancePaymentDetail.amount;
+          }
+        }
+      }
+
+      if (student.booksPayment.details) {
+        for (let bookPaymentDetail of student.booksPayment.details) {
+          if (bookPaymentDetail.date === nowDate) {
+            result.totalBooksPayment += bookPaymentDetail.amount;
+            studetTotalBooksPayment += bookPaymentDetail.amount;
+          }
+        }
+      }
+
+      result.details.push({
+        name: student.name,
+        attendancePayment: studetTotalAttendancePayment,
+        booksPayment: studetTotalBooksPayment
+      });
+    }
+
+    return result;
+  }
+
   async setBooksPayment(token, body) {
     /**
      * @param token -> assistant jwt
