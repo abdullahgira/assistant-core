@@ -46,7 +46,7 @@ class StudentService {
 
     await student.save();
     await studentTeacher.save();
-    return student;
+    return student.teachers.details;
   }
 
   async viewJoinedTeachers(token) {
