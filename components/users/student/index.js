@@ -33,7 +33,8 @@ async function recordAttendanceHandler(req, res) {
   const attendanceDetails = await studentService.recordAttendance(
     token,
     req.params.attendanceId,
-    req.params.groupId
+    req.params.groupId,
+    req.query.canAttendFromAnotherGroup
   );
   res.json(attendanceDetails);
 }

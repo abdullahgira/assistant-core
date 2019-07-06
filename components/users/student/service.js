@@ -66,7 +66,7 @@ class StudentService {
     return studentTeacher;
   }
 
-  async recordAttendance(token, attendanceId, groupId) {
+  async recordAttendance(token, attendanceId, groupId, canAttendFromAnotherGroup) {
     const studentId = middleware.authorize(token);
     const group = await groupCollection.findById(groupId);
 
@@ -80,8 +80,10 @@ class StudentService {
     const attendanceDate = new Date(Date.now()).toLocaleString();
 
     if (group.attendance_record.details[0]._id === attendanceId) {
-      if (!studentInGroup) {
+      if (!studentInGroup && canAttendFromAnotherGroup) {
         student.attendance.attendedFromAnotherGroup = true;
+      } else if (!studentInGroup && !canAttendFromAnotherGroup) {
+        throw new errorHandler.NotFromTheGroup();
       } else if (student.attendance.hasRecordedAttendance) {
         throw new errorHandler.StudentHasRecordedAttendance();
       } else {

@@ -22,6 +22,14 @@ class InvalidAttendanceId extends Error {
   }
 }
 
+class NotFromTheGroup extends Error {
+  constructor(message = 'Can\'t record attendance, you\'re not from this group!') {
+    super(message);
+    this.name = 'NotFromTheGroup';
+    this.statusCode = 405;
+  }
+}
+
 exports.DoublicateEntry = DoublicateEntry;
 exports.StudentHasRecordedAttendance = StudentHasRecordedAttendance;
 exports.InvalidAttendanceId = InvalidAttendanceId;
