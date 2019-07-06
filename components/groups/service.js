@@ -501,12 +501,16 @@ class GroupService {
     const previousNAvailableAttendances = student.attendancePayment.nAvailableAttendances;
     const previousNUnpaidAttendances = student.attendancePayment.nUnpaidAttendances;
 
-    const { monthlyPayment, nAttendancePerMonth, attendancePayment } = await teacherCollection.findById(
+    let { monthlyPayment, nAttendancePerMonth, attendancePayment } = await teacherCollection.findById(
       assistant.teacherId
     );
 
     if (!monthlyPayment || !nAttendancePerMonth || !attendancePayment) {
       throw new errorHandler.NotAllowed('Lack of group payments info');
+    }
+
+    if (student.customMonthlyAttendancePayment) {
+      monthlyPayment = student.customMonthlyAttendancePayment;
     }
 
     switch (type) {
