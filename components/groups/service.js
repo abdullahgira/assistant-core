@@ -171,7 +171,7 @@ class GroupService {
     return { code, teacherId: teacher._id };
   }
 
-  async removeStudent(body, token, groupId, studentId) {
+  async removeStudent(token, groupId, studentId) {
     /**
      * @param token -> assistant jwt
      * @param groupId -> the group in which the student will be removed
@@ -182,10 +182,12 @@ class GroupService {
     // TODO: Access student db when implemented and remove that teacher
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
-    const group = await validator.validateGroupExistence(groupId);
 
+    const studentTeacher = await validator.validateStudentExistence(studentId);
+    const group = await validator.validateGroupExistence(studentTeacher.groupId);
+
+    await validator.validateGroupExistence(groupId);
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
-    await validator.validateStudentExistence(studentId);
 
     const teacher = await teacherCollection.findById(assistant.teacherId);
     teacher.students.number--;
@@ -198,7 +200,7 @@ class GroupService {
     student.teachers.number--;
     student.teachers.details = student.teachers.details.filter(t => t._id !== teacher._id);
 
-    await studentTeacherCollection.deleteOne({ _id: studentId });
+    await studentTeacherCollection.findByIdAndDelete(studentId);
 
     await student.save();
     await group.save();

@@ -82,12 +82,7 @@ async function addStudentHandler(req, res) {
 
 async function removeStudentHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const statusCode = await groupService.removeStudent(
-    req.body,
-    token,
-    req.params.groupId,
-    req.params.studentId
-  );
+  const statusCode = await groupService.removeStudent(token, req.params.groupId, req.params.studentId);
   res.json(statusCode);
 }
 
