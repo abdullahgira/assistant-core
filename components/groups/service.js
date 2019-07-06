@@ -458,6 +458,23 @@ class GroupService {
     return { status: 200 };
   }
 
+  async setTakeMoneyOnAbsence(token, value) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    const teacher = await teacherCollection.findById(assistant.teacherId);
+    if (value === 'true') {
+      teacher.takeMoneyOnAbsence = true;
+    } else if (value === 'false') {
+      teacher.takeMoneyOnAbsence = false;
+    } else {
+      throw new errorHandler.NotAllowed('value can only be true or false');
+    }
+
+    await teacher.save();
+    return { status: 200 };
+  }
+
   async setNAttendancesPerMonth(token, body) {
     /**
      * @param token -> assistant jwt

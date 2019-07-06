@@ -45,6 +45,7 @@ router.post('/custom_payment/student_:studentId', setCustomPaymentHandler);
 
 // group settings
 router.get('/settings', groupsSettingsHnadler);
+router.get('/take_money_on_absence', setTakeMoneyOnAbsenceHandler);
 
 // switch groups
 router.get('/change_group/group_:fromGroupId/group_:toGroupId/student_:studentId', changeGroupHandler);
@@ -203,6 +204,12 @@ async function setCustomPaymentHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const student = await groupService.setCustomPayment(token, req.body, req.query.type, req.params.studentId);
   res.json(student);
+}
+
+async function setTakeMoneyOnAbsenceHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const status = await groupService.setTakeMoneyOnAbsence(token, req.query.value);
+  res.json(status);
 }
 
 module.exports = router;
