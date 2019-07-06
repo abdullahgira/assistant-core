@@ -17,6 +17,8 @@ const studentTeacherSchema = new Schema({
   parentPhone: { type: String, default: '' },
   address: { type: String },
   studentNumber: { type: String, default: '' },
+  customMonthlyAttendancePayment: { type: Number, default: 0 },
+  customBooksPayment: { type: Number, default: 0 },
   attendance: {
     number: { type: Number, default: 0 },
     attendedFromAnotherGroup: Boolean,
