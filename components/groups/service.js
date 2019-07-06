@@ -479,6 +479,22 @@ class GroupService {
     return { status: 200 };
   }
 
+  async setcustomMonthlyAttendancePayment(token, body, studentId) {
+    //  authorizing and validating the token to be of an assistant
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    // validating studentId and that he is with the same teacher as the assistant
+    const student = await validator.validateStudentExistence(studentId);
+    validator.validateStudentCanBeModifiedByAssistant(student, assistant);
+
+    schema.paymentAmount(body);
+
+    student.customMonthlyAttendancePayment = body.amount;
+    await student.save();
+    return student;
+  }
+
   async payAttendance(token, studentId, type) {
     /**
      * @param token -> json web token
