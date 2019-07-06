@@ -693,14 +693,26 @@ class GroupService {
       { strict: false }
     );
 
-    await studentTeacherCollection.updateMany(
-      { teacherId: assistant.teacherId },
-      {
-        $inc: {
-          'booksPayment.totalUnpaid': booksPayment
-        }
+    const students = await studentTeacherCollection.find({ teacherId: assistant.teacherId });
+
+    for (let i = 0; i < students.length; i++) {
+      if (students[i].customBooksPayment) {
+        students[i].booksPayment.totalUnpaid += students[i].customBooksPayment;
+      } else {
+        students[i].booksPayment.totalUnpaid += booksPayment;
       }
-    );
+      await students[i].save();
+    }
+
+    // await studentTeacherCollection.updateMany(
+    //   { teacherId: assistant.teacherId },
+    //   {
+    //     $inc: {
+    //       'booksPayment.totalUnpaid': booksPayment
+    //     }
+    //   }
+    // );
+
     return { status: 200 };
   }
 
@@ -718,14 +730,27 @@ class GroupService {
     if (!nBooksPayment) throw new errorHandler.ReachedMaxReversePayValue();
 
     await teacherCollection.updateMany({ _id: assistant.teacherId }, { $inc: { nBooksPayment: -1 } });
-    await studentTeacherCollection.updateMany(
-      { teacherId: assistant.teacherId },
-      {
-        $inc: {
-          'booksPayment.totalUnpaid': -booksPayment
-        }
+
+    const students = await studentTeacherCollection.find({ teacherId: assistant.teacherId });
+
+    for (let i = 0; i < students.length; i++) {
+      if (students[i].customBooksPayment) {
+        students[i].booksPayment.totalUnpaid += students[i].customBooksPayment;
+      } else {
+        students[i].booksPayment.totalUnpaid -= booksPayment;
       }
-    );
+      await students[i].save();
+    }
+
+    // await studentTeacherCollection.updateMany(
+    //   { teacherId: assistant.teacherId },
+    //   {
+    //     $inc: {
+    //       'booksPayment.totalUnpaid': -booksPayment
+    //     }
+    //   }
+    // );
+
     return { status: 200 };
   }
 
@@ -744,11 +769,15 @@ class GroupService {
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
-    const { booksPayment } = await teacherCollection.findById(assistant.teacherId);
+    let { booksPayment } = await teacherCollection.findById(assistant.teacherId);
 
     if (!booksPayment) throw new errorHandler.PaymentAmountIsUnknown('Books payment is unknown');
     if (!student.booksPayment.totalUnpaid)
       throw new errorHandler.PaymentIsAlreadyPaid('Already paid all the money');
+
+    if (student.customBooksPayment) {
+      booksPayment = student.customBooksPayment;
+    }
 
     student.booksPayment.number++;
     student.booksPayment.totalPaid += booksPayment;
