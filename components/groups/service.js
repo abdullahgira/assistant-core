@@ -65,9 +65,10 @@ class GroupService {
       monthlyPayment,
       nAttendancePerMonth,
       booksPayment,
-      nBooksPayment
+      nBooksPayment,
+      takeMoneyOnAbsence
     } = await teacherCollection.findById(assistant.teacherId);
-    return { attendancePayment, monthlyPayment, nAttendancePerMonth, booksPayment, nBooksPayment };
+    return { attendancePayment, monthlyPayment, nAttendancePerMonth, booksPayment, nBooksPayment, takeMoneyOnAbsence };
   }
 
   async showAllGroups(token, day) {
