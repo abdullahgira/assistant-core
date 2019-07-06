@@ -87,7 +87,7 @@ class GroupService {
     if (validGivenDay) {
       return await groupCollection.find({ teacherId: assistant.teacherId, day: day });
     } else {
-      return [];
+      return await groupCollection.find({ teacherId: assistant.teacherId });
     }
   }
 
@@ -284,6 +284,7 @@ class GroupService {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
     const group = await validator.validateGroupExistence(groupId);
+    const teacher = await teacherCollection.findById(assistant.teacherId);
 
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
@@ -307,9 +308,11 @@ class GroupService {
         s.attendance.hasRecordedAttendance = false;
 
         // payment record
-        s.attendancePayment.nAvailableAttendances
-          ? s.attendancePayment.nAvailableAttendances--
-          : s.attendancePayment.nUnpaidAttendances++;
+        if (teacher.takeMoneyOnAbsence) {
+          s.attendancePayment.nAvailableAttendances
+            ? s.attendancePayment.nAvailableAttendances--
+            : s.attendancePayment.nUnpaidAttendances++;
+        }
       }
       await s.save();
     });
@@ -368,6 +371,8 @@ class GroupService {
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
+    const teacher = await teacherCollection.findById(assistant.teacherId);
+
     const attendanceDate = new Date(Date.now()).toLocaleString().split(' ')[0];
 
     if (student.groupId !== groupId) {
@@ -384,6 +389,12 @@ class GroupService {
     student.attendance.number++;
     student.attendance.details.unshift(attendanceDate);
     student.attendance.hasRecordedAttendance = true;
+
+    if (!teacher.takeMoneyOnAbsence) {
+      student.attendancePayment.nAvailableAttendances
+        ? student.attendancePayment.nAvailableAttendances--
+        : student.attendancePayment.nUnpaidAttendances++;
+    }
 
     await student.save();
     return student;
