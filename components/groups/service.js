@@ -87,7 +87,7 @@ class GroupService {
     if (validGivenDay) {
       return await groupCollection.find({ teacherId: assistant.teacherId, day: day });
     } else {
-      return [];
+      return await groupCollection.find({ teacherId: assistant.teacherId });
     }
   }
 
