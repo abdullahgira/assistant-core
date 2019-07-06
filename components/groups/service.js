@@ -479,7 +479,7 @@ class GroupService {
     return { status: 200 };
   }
 
-  async setcustomMonthlyAttendancePayment(token, body, studentId) {
+  async setCustomPayment(token, body, type, studentId) {
     //  authorizing and validating the token to be of an assistant
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
@@ -489,8 +489,17 @@ class GroupService {
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
     schema.paymentAmount(body);
+    switch (type) {
+      case 'books':
+        student.customBooksPayment = body.amount;
+        break;
+      case 'attendance':
+        student.customMonthlyAttendancePayment = body.amount;
+        break;
+      default:
+        throw new errorHandler.InvalidPaymentType('type can only be "books" or "attendance"');
+    }
 
-    student.customMonthlyAttendancePayment = body.amount;
     await student.save();
     return student;
   }
