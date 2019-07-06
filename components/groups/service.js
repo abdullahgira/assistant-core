@@ -737,25 +737,25 @@ class GroupService {
       { strict: false }
     );
 
-    const students = await studentTeacherCollection.find({ teacherId: assistant.teacherId });
+    // students who has custom books payment
+    const students = await studentTeacherCollection.find({
+      teacherId: assistant.teacherId,
+      customBooksPayment: { $gt: 0 }
+    });
 
     for (let i = 0; i < students.length; i++) {
-      if (students[i].customBooksPayment) {
-        students[i].booksPayment.totalUnpaid += students[i].customBooksPayment;
-      } else {
-        students[i].booksPayment.totalUnpaid += booksPayment;
-      }
+      students[i].booksPayment.totalUnpaid += students[i].customBooksPayment;
       await students[i].save();
     }
 
-    // await studentTeacherCollection.updateMany(
-    //   { teacherId: assistant.teacherId },
-    //   {
-    //     $inc: {
-    //       'booksPayment.totalUnpaid': booksPayment
-    //     }
-    //   }
-    // );
+    await studentTeacherCollection.updateMany(
+      { teacherId: assistant.teacherId, customBooksPayment: { $not: { $gt: 0 } } },
+      {
+        $inc: {
+          'booksPayment.totalUnpaid': booksPayment
+        }
+      }
+    );
 
     return { status: 200 };
   }
@@ -775,25 +775,25 @@ class GroupService {
 
     await teacherCollection.updateMany({ _id: assistant.teacherId }, { $inc: { nBooksPayment: -1 } });
 
-    const students = await studentTeacherCollection.find({ teacherId: assistant.teacherId });
+    // students who has custom books payment
+    const students = await studentTeacherCollection.find({
+      teacherId: assistant.teacherId,
+      customBooksPayment: { $gt: 0 }
+    });
 
     for (let i = 0; i < students.length; i++) {
-      if (students[i].customBooksPayment) {
-        students[i].booksPayment.totalUnpaid += students[i].customBooksPayment;
-      } else {
-        students[i].booksPayment.totalUnpaid -= booksPayment;
-      }
+      students[i].booksPayment.totalUnpaid -= students[i].customBooksPayment;
       await students[i].save();
     }
 
-    // await studentTeacherCollection.updateMany(
-    //   { teacherId: assistant.teacherId },
-    //   {
-    //     $inc: {
-    //       'booksPayment.totalUnpaid': -booksPayment
-    //     }
-    //   }
-    // );
+    await studentTeacherCollection.updateMany(
+      { teacherId: assistant.teacherId, customBooksPayment: { $not: { $gt: 0 } } },
+      {
+        $inc: {
+          'booksPayment.totalUnpaid': -booksPayment
+        }
+      }
+    );
 
     return { status: 200 };
   }
