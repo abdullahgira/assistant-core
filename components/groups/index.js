@@ -41,6 +41,7 @@ router.get('/group_:groupId/total_payments', showTodayGroupPaymentHandler);
 
 // student details
 router.get('/student_:studentId', getStudentDetailsHandler);
+router.post('/custom_payment/student_:studentId', setCustomPaymentHandler);
 
 // group settings
 router.get('/settings', groupsSettingsHnadler);
@@ -200,6 +201,12 @@ async function changeGroupHandler(req, res) {
     req.params.toGroupId,
     req.params.studentId
   );
+  res.json(student);
+}
+
+async function setCustomPaymentHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const student = await groupService.setCustomPayment(token, req.body, req.query.type, req.params.studentId);
   res.json(student);
 }
 
