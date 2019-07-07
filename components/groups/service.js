@@ -207,12 +207,14 @@ class GroupService {
     group.students.details = group.students.details.filter(s => s._id !== studentId);
 
     const student = await studentCollection.findOne({ 'teachers.details.studentTeacherId': studentId });
-    student.teachers.number--;
-    student.teachers.details = student.teachers.details.filter(t => t._id !== teacher._id);
+    if (student) {
+      student.teachers.number--;
+      student.teachers.details = student.teachers.details.filter(t => t._id !== teacher._id);
+
+      await student.save();
+    }
 
     await studentTeacherCollection.findByIdAndDelete(studentId);
-
-    await student.save();
     await group.save();
     await teacher.save();
     return { status: 200 }; // success message
