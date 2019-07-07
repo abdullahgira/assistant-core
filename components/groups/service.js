@@ -68,7 +68,14 @@ class GroupService {
       nBooksPayment,
       takeMoneyOnAbsence
     } = await teacherCollection.findById(assistant.teacherId);
-    return { attendancePayment, monthlyPayment, nAttendancePerMonth, booksPayment, nBooksPayment, takeMoneyOnAbsence };
+    return {
+      attendancePayment,
+      monthlyPayment,
+      nAttendancePerMonth,
+      booksPayment,
+      nBooksPayment,
+      takeMoneyOnAbsence
+    };
   }
 
   async showAllGroups(token, day) {
@@ -88,7 +95,9 @@ class GroupService {
     if (validGivenDay) {
       return await groupCollection.find({ teacherId: assistant.teacherId, day: day });
     } else {
-      return await groupCollection.find({ teacherId: assistant.teacherId });
+      const groups = await groupCollection.find({ teacherId: assistant.teacherId });
+      groups.sort((x, y) => validDays.findIndex(i => i === x.day) - validDays.findIndex(i => i === y.day));
+      return groups;
     }
   }
 
