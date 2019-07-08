@@ -27,9 +27,10 @@ app.disable('etag');
 app.disable('x-powered-by');
 
 app.use((req, res, next) => {
+  // res.setHeader("Access-Control-Allow-Headers", req.getHeader("Access-Control-Request-Headers")); // allow any headers
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', '*');
-  res.header('Access-Control-Expose-Headers', 'x-auth-token');
+  res.header('Access-Control-Allow-Headers', 'content-type, x-auth-token');
+  res.header('Access-Control-Expose-Headers', 'content-type, x-auth-token');
   next();
 });
 
