@@ -38,6 +38,27 @@ function addStudent(body) {
   return Joi.validate(body, schema);
 }
 
+function editStudent(body) {
+  const schema = {
+    name: Joi.string()
+      .min(4)
+      .max(50),
+    phone: Joi.string()
+      .regex(/^\+?[0-9]+/)
+      .min(11)
+      .max(13),
+    parentPhone: Joi.string()
+      .regex(/^\+?[0-9]+/)
+      .min(11)
+      .max(13),
+    address: Joi.string()
+      .min(10)
+      .max(150),
+    studentNumber: Joi.string().max(20)
+  };
+  return Joi.validate(body, schema);
+}
+
 function paymentAmount(body) {
   const schema = {
     amount: Joi.number().required()
@@ -57,5 +78,6 @@ function nAttendancesPerMonth(body) {
 
 exports.createGroup = createGroup;
 exports.addStudent = addStudent;
+exports.editStudent = editStudent;
 exports.paymentAmount = paymentAmount;
 exports.nAttendancesPerMonth = nAttendancesPerMonth;

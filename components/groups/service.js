@@ -181,6 +181,25 @@ class GroupService {
     return { code, teacherId: teacher._id };
   }
 
+  async editStudent(token, body, studentId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    // validating studentId and that he is with the same teacher as the assistant
+    const student = await validator.validateStudentExistence(studentId);
+    validator.validateStudentCanBeModifiedByAssistant(student, assistant);
+
+    const { error } = schema.editStudent(body);
+    if (error) throw new errorHandler.GroupCreationError(error.details[0].message);
+
+    for (let property in body) {
+      student[property] = body[property];
+    }
+
+    await student.save();
+    return student;
+  }
+
   async removeStudent(token, groupId, studentId) {
     /**
      * @param token -> assistant jwt

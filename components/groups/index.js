@@ -10,7 +10,9 @@ router.delete('/group_:groupId', deleteGroupHandler);
 
 // student
 router.post('/group_:id/add_student', addStudentHandler);
+router.post('/student_:studentId', editStudentHandler);
 router.delete('/group_:groupId/students/student_:studentId', removeStudentHandler);
+
 router.get('/students', searchStudentsHandler);
 router.get('/group_:groupId/students', showGroupStudentsHandler);
 
@@ -79,6 +81,12 @@ async function addStudentHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const code = await groupService.addStudent(req.body, token, req.params.id);
   res.json(code);
+}
+
+async function editStudentHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const student = await groupService.editStudent(token, req.body, req.params.studentId);
+  res.json(student);
 }
 
 async function removeStudentHandler(req, res) {
