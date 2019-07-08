@@ -98,12 +98,13 @@ class ScoreService {
     groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
     const student = await groupsValidator.validateStudentExistence(studentId);
+    groupsValidator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
     const { error } = schema.addScore(body);
     if (error) throw new errorHandler.InvalidBody(error.details[0].message);
 
     const { maxScore, redoScore } = await teacherCollection.findById(assistant.teacherId);
-    if (!maxScore || !redoScore) {
+    if (!maxScore) {
       throw new errorHandler.InvalidScoreValue('You have to set Max and Redo Scores');
     }
 
@@ -114,14 +115,17 @@ class ScoreService {
     if (group.attendance_record.details[0]) {
       let lastGroupAttendanceDate = group.attendance_record.details[0].date;
       let studentHasAttendedLastDate = student.attendance.details[0] === lastGroupAttendanceDate;
+
       if (studentHasAttendedLastDate) {
         const scoreIdx = student.scores.findIndex(s => s.date === lastGroupAttendanceDate);
+
         if (scoreIdx !== -1) {
           throw new errorHandler.DuplicateScores();
         }
+
         const studentScore = {
           score: body.score,
-          hasToMakeRedo: body.score <= redoScore,
+          hasToMakeRedo: redoScore === 0 ? false : body.score <= redoScore,
           hasGotMaxScore: body.score === maxScore,
           date: new Date(Date.now()).toLocaleString().split(' ')[0]
         };
@@ -149,9 +153,10 @@ class ScoreService {
     groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
     const student = await groupsValidator.validateStudentExistence(studentId);
+    groupsValidator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
     const { maxScore, redoScore } = await teacherCollection.findById(assistant.teacherId);
-    if (!maxScore || !redoScore) {
+    if (!maxScore) {
       throw new errorHandler.InvalidScoreValue('You have to set Max and Redo Scores');
     }
 
@@ -163,7 +168,7 @@ class ScoreService {
 
     const studentScore = {
       score: body.score,
-      hasToMakeRedo: body.score <= redoScore,
+      hasToMakeRedo: redoScore === 0 ? false : body.score <= redoScore,
       hasGotMaxScore: body.score === maxScore
     };
 
