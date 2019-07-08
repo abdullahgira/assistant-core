@@ -60,24 +60,29 @@ class ScoreService {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await groupsValidator.validateAssistantExistence(assistantId);
 
-    const { error } = schema.setMaxAndRedoScores(body);
-    if (error) throw new errorHandler.InvalidBody(error.details[0].message);
-
     switch (type) {
-      case 'redo':
+      case 'redo': {
+        const { error } = schema.setRedoScores(body);
+        if (error) throw new errorHandler.InvalidBody(error.details[0].message);
+
         await teacherCollection.updateOne(
           { _id: assistant.teacherId },
           { $set: { redoScore: body.score } },
           { strict: false }
         );
         break;
-      case 'max':
+      }
+      case 'max': {
+        const { error } = schema.setMaxScores(body);
+        if (error) throw new errorHandler.InvalidBody(error.details[0].message);
+
         await teacherCollection.updateOne(
           { _id: assistant.teacherId },
           { $set: { maxScore: body.score } },
           { strict: false }
         );
         break;
+      }
       default:
         throw new errorHandler.InvalidType('Type can only be max or redo');
     }

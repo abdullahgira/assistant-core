@@ -9,7 +9,7 @@ function addScore(body) {
   return Joi.validate(body, schema);
 }
 
-function setMaxAndRedoScores(body) {
+function setMaxScores(body) {
   const schema = {
     score: Joi.number()
       .min(1)
@@ -18,5 +18,15 @@ function setMaxAndRedoScores(body) {
   return Joi.validate(body, schema);
 }
 
+function setRedoScores(body) {
+  const schema = {
+    score: Joi.number()
+      .min(0)
+      .required()
+  };
+  return Joi.validate(body, schema);
+}
+
 exports.addScore = addScore;
-exports.setMaxAndRedoScores = setMaxAndRedoScores;
+exports.setMaxScores = setMaxScores;
+exports.setRedoScores = setRedoScores;
