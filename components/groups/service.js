@@ -828,7 +828,7 @@ class GroupService {
     return { status: 200 };
   }
 
-  async payBooks(token, studentId) {
+  async payBooks(token, studentId, customValue) {
     /**
      * @param token -> assistant jwt
      * @param studentId -> the studen that will pay the books
@@ -854,10 +854,10 @@ class GroupService {
     }
 
     student.booksPayment.number++;
-    student.booksPayment.totalPaid += booksPayment;
-    student.booksPayment.totalUnpaid -= booksPayment;
+    student.booksPayment.totalPaid += parseFloat(customValue) || booksPayment;
+    student.booksPayment.totalUnpaid -= parseFloat(customValue) || booksPayment;
     student.booksPayment.details.unshift({
-      amount: booksPayment,
+      amount: parseFloat(customValue) || booksPayment,
       date: new Date(Date.now()).toLocaleString().split(' ')[0]
     });
 
@@ -879,8 +879,7 @@ class GroupService {
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
-    if (student.booksPayment.number === 0 || student.booksPayment.totalPaid === 0)
-      throw new errorHandler.ReachedMaxReversePayValue();
+    if (student.booksPayment.number === 0) throw new errorHandler.ReachedMaxReversePayValue();
 
     // getting the details of the last payment
     const lastPaymentDetails = student.booksPayment.details.shift();

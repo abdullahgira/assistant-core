@@ -132,7 +132,7 @@ async function reversePayAttendanceHandler(req, res) {
 
 async function payBooksHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const student = await groupService.payBooks(token, req.params.studentId);
+  const student = await groupService.payBooks(token, req.params.studentId, req.query.customValue);
   res.json(student);
 }
 
