@@ -115,7 +115,12 @@ async function recordAttendanceHandler(req, res) {
 
 async function payAttendanceHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const student = await groupService.payAttendance(token, req.params.studentId, req.query.type);
+  const student = await groupService.payAttendance(
+    token,
+    req.params.studentId,
+    req.query.type,
+    req.query.customValue
+  );
   res.json(student);
 }
 

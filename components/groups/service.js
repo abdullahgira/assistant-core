@@ -554,7 +554,7 @@ class GroupService {
     return student;
   }
 
-  async payAttendance(token, studentId, type) {
+  async payAttendance(token, studentId, type, customValue) {
     /**
      * @param token -> json web token
      * @param studentId -> the id of the student that will record attendance
@@ -591,8 +591,8 @@ class GroupService {
     switch (type) {
       case 'month':
         student.attendancePayment.number++;
-        student.attendancePayment.amount = monthlyPayment;
-        student.attendancePayment.totalPaid += monthlyPayment;
+        student.attendancePayment.amount = customValue || monthlyPayment;
+        student.attendancePayment.totalPaid += parseFloat(customValue) || monthlyPayment;
 
         if (student.attendancePayment.nUnpaidAttendances > nAttendancePerMonth) {
           student.attendancePayment.nUnpaidAttendances -= nAttendancePerMonth;
@@ -605,8 +605,8 @@ class GroupService {
         break;
       case 'lesson':
         student.attendancePayment.number++;
-        student.attendancePayment.amount = attendancePayment;
-        student.attendancePayment.totalPaid += attendancePayment;
+        student.attendancePayment.amount = customValue || attendancePayment;
+        student.attendancePayment.totalPaid += parseFloat(customValue) || attendancePayment;
         student.attendancePayment.nUnpaidAttendances--;
         break;
       default:
@@ -643,8 +643,7 @@ class GroupService {
 
     // the or statement is to make sure it doesn't make an invalid operation,
     // although it should be impossible to happen.
-    if (student.attendancePayment.number === 0 || student.attendancePayment.totalPaid === 0)
-      throw new errorHandler.ReachedMaxReversePayValue();
+    if (student.attendancePayment.number === 0) throw new errorHandler.ReachedMaxReversePayValue();
 
     // getting the details of the last payment
     const lastPaymentDetails = student.attendancePayment.details.shift();
