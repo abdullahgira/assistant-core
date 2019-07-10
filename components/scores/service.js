@@ -60,11 +60,13 @@ class ScoreService {
 
     const { maxScore, redoScore } = await teacherCollection.findById(assistant.teacherId);
     if (!maxScore) {
-      throw new errorHandler.InvalidScoreValue('You have to set Max Score');
+      throw new errorHandler.InvalidScoreValue('you have to set Max Score');
     }
 
     if (body.score > maxScore) {
-      throw new errorHandler.InvalidScoreValue('Score cannot be more than maximum score!');
+      throw new errorHandler.InvalidScoreValue(
+        `score must be smaller than or equal to the maximum score (${maxScore})!`
+      );
     }
 
     const lastGroupScoreRecord = group.scores_record.details[0].date;
@@ -80,6 +82,47 @@ class ScoreService {
     };
 
     student.scores.unshift(studentScore);
+
+    await student.save();
+    return student.scores;
+  }
+
+  async editScore(token, body, groupId, studentId, scoreId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
+
+    const { error } = schema.addScore(body);
+    if (error) throw new errorHandler.InvalidBody(error.details[0].message);
+
+    const group = await groupsValidator.validateGroupExistence(groupId);
+    groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
+
+    const student = await groupsValidator.validateStudentExistence(studentId);
+    groupsValidator.validateStudentCanBeModifiedByAssistant(student, assistant);
+
+    const { maxScore, redoScore } = await teacherCollection.findById(assistant.teacherId);
+    if (!maxScore) {
+      throw new errorHandler.InvalidScoreValue('you have to set max score!');
+    }
+
+    if (body.score > maxScore) {
+      throw new errorHandler.InvalidScoreValue(
+        `score must be smaller than or equal to the maximum score (${maxScore})!`
+      );
+    }
+
+    const studentScore = {
+      score: body.score,
+      hasToMakeRedo: redoScore === 0 ? false : body.score <= redoScore,
+      hasGotMaxScore: body.score === maxScore
+    };
+
+    const scoreIndex = student.scores.findIndex(s => String(s._id) === scoreId);
+    if (scoreIndex !== -1) {
+      student.scores[scoreIndex] = { _id: scoreId, ...studentScore, date: student.scores[scoreIndex].date };
+    } else {
+      throw new errorHandler.InvalidScoreId();
+    }
 
     await student.save();
     return student.scores;
@@ -145,47 +188,6 @@ class ScoreService {
     }
 
     return { status: 200 };
-  }
-
-  async editScore(token, body, groupId, studentId, scoreId) {
-    const assistantId = assistantMiddleware.authorize(token);
-    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
-
-    const { error } = schema.addScore(body);
-    if (error) throw new errorHandler.InvalidBody(error.details[0].message);
-
-    const group = await groupsValidator.validateGroupExistence(groupId);
-    groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
-
-    const student = await groupsValidator.validateStudentExistence(studentId);
-    groupsValidator.validateStudentCanBeModifiedByAssistant(student, assistant);
-
-    const { maxScore, redoScore } = await teacherCollection.findById(assistant.teacherId);
-    if (!maxScore) {
-      throw new errorHandler.InvalidScoreValue('You have to set Max and Redo Scores');
-    }
-
-    if (body.score > maxScore) {
-      throw new errorHandler.InvalidScoreValue(
-        `score must be smaller than or equal to the current max score (${maxScore})`
-      );
-    }
-
-    const studentScore = {
-      score: body.score,
-      hasToMakeRedo: redoScore === 0 ? false : body.score <= redoScore,
-      hasGotMaxScore: body.score === maxScore
-    };
-
-    const scoreIndex = student.scores.findIndex(s => String(s._id) === scoreId);
-    if (scoreIndex !== -1) {
-      student.scores[scoreIndex] = { _id: scoreId, ...studentScore, date: student.scores[scoreIndex].date };
-    } else {
-      throw new errorHandler.InvalidScoreId();
-    }
-
-    await student.save();
-    return student.scores;
   }
 
   async deleteScore(token, groupId, studentId, scoreId) {
