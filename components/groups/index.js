@@ -20,7 +20,7 @@ router.get('/group_:groupId/students', showGroupStudentsHandler);
 router.get('/group_:groupId/set_new_attendance_record', setNewAttendanceRecordHandler);
 router.get('/group_:groupId/record_attendance/student_:studentId', recordAttendanceHandler);
 router.get('/group_:groupId/show_recent_attendance_details', showRecentAttendanceDetailsHandler);
-router.get('/group_:groupId/students', showAbsentStudentsHandler);
+router.get('/group_:groupId/absent_students', showAbsentStudentsHandler);
 
 // setting payment amount for books and attendance, and number of attendances per month
 router.post('/set_attendance_payment', setAttendancePaymentHandler); // handles month and lesson using the type query
