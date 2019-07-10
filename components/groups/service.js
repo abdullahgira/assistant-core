@@ -855,11 +855,12 @@ class GroupService {
       booksPayment = student.customBooksPayment;
     }
 
+    booksPayment = customValue >= 0 ? parseFloat(customValue) : booksPayment;
     student.booksPayment.number++;
-    student.booksPayment.totalPaid += parseFloat(customValue) || booksPayment;
-    student.booksPayment.totalUnpaid -= parseFloat(customValue) || booksPayment;
+    student.booksPayment.totalPaid += booksPayment;
+    student.booksPayment.totalUnpaid -= booksPayment;
     student.booksPayment.details.unshift({
-      amount: parseFloat(customValue) || booksPayment,
+      amount: booksPayment,
       date: new Date(Date.now()).toLocaleString().split(' ')[0]
     });
 
