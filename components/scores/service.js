@@ -1,3 +1,5 @@
+const shortid = require('shortid');
+
 const errorHandler = require('./error');
 const schema = require('./schema');
 
@@ -13,6 +15,24 @@ class ScoreService {
     const student = await groupsValidator.validateStudentExistence(studentId);
 
     return student.scores;
+  }
+
+  async setNewScoresRecord(token, groupId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
+
+    const group = await groupsValidator.validateGroupExistence(groupId);
+    groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
+
+    const nowDate = new Date(Date.now()).toLocaleString().split(' ')[0];
+    group.scores_record.number++;
+    group.scores_record.details.unshift({
+      _id: shortid.generate(),
+      date: nowDate
+    });
+
+    await group.save();
+    return group.scores_record.details[0];
   }
 
   async scoresDates(token, groupId) {
