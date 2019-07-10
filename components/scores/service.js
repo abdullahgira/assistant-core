@@ -42,10 +42,47 @@ class ScoreService {
     const group = await groupsValidator.validateGroupExistence(groupId);
     groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
-    const attendanceDetails = group.attendance_record.details.map(a => a.date);
-    const uniqueAttendanceDates = attendanceDetails.filter((v, i) => attendanceDetails.indexOf(v) === i);
+    return group.scores_record.details;
+  }
 
-    return uniqueAttendanceDates;
+  async addScore(token, body, groupId, studentId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
+
+    const group = await groupsValidator.validateGroupExistence(groupId);
+    groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
+
+    const student = await groupsValidator.validateStudentExistence(studentId);
+    groupsValidator.validateStudentCanBeModifiedByAssistant(student, assistant);
+
+    const { error } = schema.addScore(body);
+    if (error) throw new errorHandler.InvalidBody(error.details[0].message);
+
+    const { maxScore, redoScore } = await teacherCollection.findById(assistant.teacherId);
+    if (!maxScore) {
+      throw new errorHandler.InvalidScoreValue('You have to set Max Score');
+    }
+
+    if (body.score > maxScore) {
+      throw new errorHandler.InvalidScoreValue('Score cannot be more than maximum score!');
+    }
+
+    const lastGroupScoreRecord = group.scores_record.details[0].date;
+
+    if (!group.scores_record.details) throw new errorHandler.NoScoreHasBeenRecorded();
+    if (student.scores[0].date === lastGroupScoreRecord) throw new errorHandler.DuplicateScores();
+
+    const studentScore = {
+      score: body.score,
+      hasToMakeRedo: redoScore === 0 ? false : body.score <= redoScore,
+      hasGotMaxScore: body.score === maxScore,
+      date: lastGroupScoreRecord
+    };
+
+    student.scores.unshift(studentScore);
+
+    await student.save();
+    return student.scores;
   }
 
   async getScoresBasedOnDate(token, groupId, date) {
@@ -108,58 +145,6 @@ class ScoreService {
     }
 
     return { status: 200 };
-  }
-
-  async addScore(token, body, groupId, studentId) {
-    const assistantId = assistantMiddleware.authorize(token);
-    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
-
-    const group = await groupsValidator.validateGroupExistence(groupId);
-    groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
-
-    const student = await groupsValidator.validateStudentExistence(studentId);
-    groupsValidator.validateStudentCanBeModifiedByAssistant(student, assistant);
-
-    const { error } = schema.addScore(body);
-    if (error) throw new errorHandler.InvalidBody(error.details[0].message);
-
-    const { maxScore, redoScore } = await teacherCollection.findById(assistant.teacherId);
-    if (!maxScore) {
-      throw new errorHandler.InvalidScoreValue('You have to set Max and Redo Scores');
-    }
-
-    if (body.score > maxScore) {
-      throw new errorHandler.InvalidScoreValue('Score cannot be more than the current max score!');
-    }
-
-    if (group.attendance_record.details[0]) {
-      let lastGroupAttendanceDate = group.attendance_record.details[0].date;
-      let studentHasAttendedLastDate = student.attendance.details[0] === lastGroupAttendanceDate;
-
-      if (studentHasAttendedLastDate) {
-        const scoreIdx = student.scores.findIndex(s => s.date === lastGroupAttendanceDate);
-
-        if (scoreIdx !== -1) {
-          throw new errorHandler.DuplicateScores();
-        }
-
-        const studentScore = {
-          score: body.score,
-          hasToMakeRedo: redoScore === 0 ? false : body.score <= redoScore,
-          hasGotMaxScore: body.score === maxScore,
-          date: new Date(Date.now()).toLocaleString().split(' ')[0]
-        };
-
-        student.scores.unshift(studentScore);
-      } else {
-        throw new errorHandler.StudentHasNotAttendedLastGroupAttendance();
-      }
-    } else {
-      throw new errorHandler.GroupHasNoAttendanceRecord();
-    }
-
-    await student.save();
-    return student.scores;
   }
 
   async editScore(token, body, groupId, studentId, scoreId) {
