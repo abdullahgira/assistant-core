@@ -18,6 +18,10 @@ const groupSchema = new Schema({
     number: { type: Number, default: 0 },
     details: [{ _id: String, date: String }]
   },
+  scores_record: {
+    number: { type: Number, default: 0 },
+    details: [{ _id: String, date: String }]
+  },
   students: {
     number: { type: Number, default: 0 },
     details: [{ _id: String, name: String }]
