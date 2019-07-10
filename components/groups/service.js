@@ -588,11 +588,13 @@ class GroupService {
       monthlyPayment = student.customMonthlyAttendancePayment;
     }
 
+    monthlyPayment = customValue >= 0 ? parseFloat(customValue) : monthlyPayment;
+    attendancePayment = customValue >= 0 ? parseFloat(customValue) : attendancePayment;
     switch (type) {
       case 'month':
         student.attendancePayment.number++;
-        student.attendancePayment.amount = customValue || monthlyPayment;
-        student.attendancePayment.totalPaid += parseFloat(customValue) || monthlyPayment;
+        student.attendancePayment.amount = monthlyPayment;
+        student.attendancePayment.totalPaid += monthlyPayment;
 
         if (student.attendancePayment.nUnpaidAttendances > nAttendancePerMonth) {
           student.attendancePayment.nUnpaidAttendances -= nAttendancePerMonth;
@@ -605,8 +607,8 @@ class GroupService {
         break;
       case 'lesson':
         student.attendancePayment.number++;
-        student.attendancePayment.amount = customValue || attendancePayment;
-        student.attendancePayment.totalPaid += parseFloat(customValue) || attendancePayment;
+        student.attendancePayment.amount = attendancePayment;
+        student.attendancePayment.totalPaid += attendancePayment;
         student.attendancePayment.nUnpaidAttendances--;
         break;
       default:
@@ -853,11 +855,12 @@ class GroupService {
       booksPayment = student.customBooksPayment;
     }
 
+    booksPayment = customValue >= 0 ? parseFloat(customValue) : booksPayment;
     student.booksPayment.number++;
-    student.booksPayment.totalPaid += parseFloat(customValue) || booksPayment;
-    student.booksPayment.totalUnpaid -= parseFloat(customValue) || booksPayment;
+    student.booksPayment.totalPaid += booksPayment;
+    student.booksPayment.totalUnpaid -= booksPayment;
     student.booksPayment.details.unshift({
-      amount: parseFloat(customValue) || booksPayment,
+      amount: booksPayment,
       date: new Date(Date.now()).toLocaleString().split(' ')[0]
     });
 
