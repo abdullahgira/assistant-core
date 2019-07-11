@@ -156,7 +156,7 @@ class ScoreService {
     return student.scores;
   }
 
-  async getScores(token, studentId) {
+  async getScoresForStudent(token, studentId) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await groupsValidator.validateAssistantExistence(assistantId);
 
@@ -179,7 +179,13 @@ class ScoreService {
     const group = await groupsValidator.validateGroupExistence(groupId);
     groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
-    const students = await studentTeacherCollection.find({ 'scores.date': date });
+    const students = await studentTeacherCollection
+      .find({
+        'scores.date': date,
+        teacherId: assistant.teacherId,
+        groupId
+      })
+      .sort({ studentNumber: 1 });
     const studentsScores = students.map(s => ({ _id: s._id, name: s.name, score: s.scores[0] }));
     return studentsScores;
   }

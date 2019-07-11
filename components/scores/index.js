@@ -5,7 +5,7 @@ const { ScoreService } = require('./service');
 const scoreService = new ScoreService();
 
 router.get('/group_:groupId', scoresDatesHandler);
-router.get('/student_:studentId', getScoresHandler);
+router.get('/student_:studentId', getScoresForStudentHandler);
 router.get('/group_:groupId/students', getScoresBasedOnDateHandler);
 
 router.get('/group_:groupId/set_new_score_record', setNewScoreRecordHandler);
@@ -16,9 +16,9 @@ router.post('/edit_score/group_:groupId/student_:studentId/score_:scoreId', edit
 
 router.delete('/delete_score/group_:groupId/student_:studentId/score_:scoreId', deleteScoreHandler);
 
-async function getScoresHandler(req, res) {
+async function getScoresForStudentHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const scores = await scoreService.getScores(token, req.params.studentId);
+  const scores = await scoreService.getScoresForStudent(token, req.params.studentId);
   res.json(scores);
 }
 
