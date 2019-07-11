@@ -1,3 +1,5 @@
+const shortid = require('shortid');
+
 const errorHandler = require('./error');
 const schema = require('./schema');
 
@@ -8,11 +10,22 @@ const { studentTeacherCollection } = require('../users/studentTeacher.model');
 const assistantMiddleware = require('../users/assistant/middleware');
 
 class ScoreService {
-  async getScores(token, studentId) {
-    assistantMiddleware.authorize(token);
-    const student = await groupsValidator.validateStudentExistence(studentId);
+  async setNewScoreRecord(token, groupId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
 
-    return student.scores;
+    const group = await groupsValidator.validateGroupExistence(groupId);
+    groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
+
+    const nowDate = new Date(Date.now()).toLocaleString().split(' ')[0];
+    group.scores_record.number++;
+    group.scores_record.details.unshift({
+      _id: shortid.generate(),
+      date: nowDate
+    });
+
+    await group.save();
+    return group.scores_record.details[0];
   }
 
   async scoresDates(token, groupId) {
@@ -22,38 +35,7 @@ class ScoreService {
     const group = await groupsValidator.validateGroupExistence(groupId);
     groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
-    const attendanceDetails = group.attendance_record.details.map(a => a.date);
-    const uniqueAttendanceDates = attendanceDetails.filter((v, i) => attendanceDetails.indexOf(v) === i);
-
-    return uniqueAttendanceDates;
-  }
-
-  async getScoresBasedOnDate(token, groupId, date) {
-    const assistantId = assistantMiddleware.authorize(token);
-    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
-
-    const group = await groupsValidator.validateGroupExistence(groupId);
-    groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
-
-    const students = await studentTeacherCollection.find({ 'scores.date': date });
-    const studentsScores = students.map(s => ({ _id: s._id, name: s.name, score: s.scores[0] }));
-    return studentsScores;
-  }
-
-  async getLastAttendedStudents(token, groupId) {
-    const assistantId = assistantMiddleware.authorize(token);
-    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
-
-    const group = await groupsValidator.validateGroupExistence(groupId);
-    groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
-
-    let lastAttendanceDate = 0;
-    if (group.attendance_record.details[0]) {
-      lastAttendanceDate = group.attendance_record.details[0].date;
-      return await studentTeacherCollection.find({ 'attendance.details': lastAttendanceDate });
-    } else {
-      return [];
-    }
+    return group.scores_record.details;
   }
 
   async setMaxAndRedoScores(token, body, type) {
@@ -105,41 +87,32 @@ class ScoreService {
 
     const { maxScore, redoScore } = await teacherCollection.findById(assistant.teacherId);
     if (!maxScore) {
-      throw new errorHandler.InvalidScoreValue('You have to set Max and Redo Scores');
+      throw new errorHandler.InvalidScoreValue('you have to set Max Score');
     }
 
     if (body.score > maxScore) {
-      throw new errorHandler.InvalidScoreValue('Score cannot be more than the current max score!');
+      throw new errorHandler.InvalidScoreValue(
+        `score must be smaller than or equal to the maximum score (${maxScore})!`
+      );
     }
 
-    if (group.attendance_record.details[0]) {
-      let lastGroupAttendanceDate = group.attendance_record.details[0].date;
-      let studentHasAttendedLastDate = student.attendance.details[0] === lastGroupAttendanceDate;
+    const lastGroupScoreRecord = group.scores_record.details[0].date;
 
-      if (studentHasAttendedLastDate) {
-        const scoreIdx = student.scores.findIndex(s => s.date === lastGroupAttendanceDate);
+    if (!group.scores_record.details) throw new errorHandler.NoScoreHasBeenRecorded();
+    if (student.scores.length && student.scores[0].date === lastGroupScoreRecord)
+      throw new errorHandler.DuplicateScores();
 
-        if (scoreIdx !== -1) {
-          throw new errorHandler.DuplicateScores();
-        }
+    const studentScore = {
+      score: body.score,
+      hasToMakeRedo: redoScore === 0 ? false : body.score <= redoScore,
+      hasGotMaxScore: body.score === maxScore,
+      date: lastGroupScoreRecord
+    };
 
-        const studentScore = {
-          score: body.score,
-          hasToMakeRedo: redoScore === 0 ? false : body.score <= redoScore,
-          hasGotMaxScore: body.score === maxScore,
-          date: new Date(Date.now()).toLocaleString().split(' ')[0]
-        };
-
-        student.scores.unshift(studentScore);
-      } else {
-        throw new errorHandler.StudentHasNotAttendedLastGroupAttendance();
-      }
-    } else {
-      throw new errorHandler.GroupHasNoAttendanceRecord();
-    }
+    student.scores.unshift(studentScore);
 
     await student.save();
-    return student.scores;
+    return student.scores[0];
   }
 
   async editScore(token, body, groupId, studentId, scoreId) {
@@ -157,12 +130,12 @@ class ScoreService {
 
     const { maxScore, redoScore } = await teacherCollection.findById(assistant.teacherId);
     if (!maxScore) {
-      throw new errorHandler.InvalidScoreValue('You have to set Max and Redo Scores');
+      throw new errorHandler.InvalidScoreValue('you have to set max score!');
     }
 
     if (body.score > maxScore) {
       throw new errorHandler.InvalidScoreValue(
-        `score must be smaller than or equal to the current max score (${maxScore})`
+        `score must be smaller than or equal to the maximum score (${maxScore})!`
       );
     }
 
@@ -183,11 +156,40 @@ class ScoreService {
     return student.scores;
   }
 
+  async getScores(token, studentId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
+
+    const student = await groupsValidator.validateStudentExistence(studentId);
+    groupsValidator.validateStudentCanBeModifiedByAssistant(student, assistant);
+
+    return student.scores;
+  }
+
+  async getScoresBasedOnDate(token, groupId, date) {
+    // this logic might be an issue in viewing the score of that day only
+
+    // TODO:
+    // * check if date is in gropu.scores_record dates
+    // *
+
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
+
+    const group = await groupsValidator.validateGroupExistence(groupId);
+    groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
+
+    const students = await studentTeacherCollection.find({ 'scores.date': date });
+    const studentsScores = students.map(s => ({ _id: s._id, name: s.name, score: s.scores[0] }));
+    return studentsScores;
+  }
+
   async deleteScore(token, groupId, studentId, scoreId) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await groupsValidator.validateAssistantExistence(assistantId);
 
     const student = await groupsValidator.validateStudentExistence(studentId);
+    groupsValidator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
     const group = await groupsValidator.validateGroupExistence(groupId);
     groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
