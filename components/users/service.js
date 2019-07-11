@@ -66,7 +66,7 @@ class UserService {
     const isValidPassword = await user.validatePassword(body.password, user.password);
     if (!isValidPassword) throw new generalErrorHandler.InvalidCredentials();
 
-    return user;
+    return { name: user.name, email: user.email };
   }
 }
 
