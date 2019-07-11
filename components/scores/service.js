@@ -186,7 +186,12 @@ class ScoreService {
         groupId
       })
       .sort({ studentNumber: 1 });
-    const studentsScores = students.map(s => ({ _id: s._id, name: s.name, score: s.scores[0] }));
+    const studentsScores = students.map(s => ({
+      _id: s._id,
+      name: s.name,
+      score: s.scores[0],
+      studentNumber: s.studentNumber
+    }));
     return studentsScores;
   }
 
