@@ -10,14 +10,7 @@ const { studentTeacherCollection } = require('../users/studentTeacher.model');
 const assistantMiddleware = require('../users/assistant/middleware');
 
 class ScoreService {
-  async getScores(token, studentId) {
-    assistantMiddleware.authorize(token);
-    const student = await groupsValidator.validateStudentExistence(studentId);
-
-    return student.scores;
-  }
-
-  async setNewScoresRecord(token, groupId) {
+  async setNewScoreRecord(token, groupId) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await groupsValidator.validateAssistantExistence(assistantId);
 

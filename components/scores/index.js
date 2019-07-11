@@ -8,6 +8,8 @@ router.get('/group_:groupId', scoresDatesHandler);
 router.get('/student_:studentId', getScoresHandler);
 router.get('/group_:groupId/students', getScoresBasedOnDateHandler);
 
+router.get('/group_:groupId/set_new_score_record', setNewScoreRecordHandler);
+
 router.post('/set_score', setScoreHandler);
 router.post('/add_score/group_:groupId/student_:studentId', addScoreHandler);
 router.post('/edit_score/group_:groupId/student_:studentId/score_:scoreId', editScoreHandler);
@@ -30,6 +32,12 @@ async function scoresDatesHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const dates = await scoreService.scoresDates(token, req.params.groupId);
   res.json(dates);
+}
+
+async function setNewScoreRecordHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const date = await scoreService.setNewScoreRecord(token, req.params.groupId);
+  res.json(date);
 }
 
 async function setScoreHandler(req, res) {
