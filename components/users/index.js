@@ -21,7 +21,7 @@ async function registerHandler(req, res) {
 async function loginHandler(req, res) {
   const user = await userService.login(req.body);
   res.set('x-auth-token', user.generateAuthToken());
-  res.json(user);
+  res.json({ name: user.name, email: user.email });
 }
 
 module.exports = router;

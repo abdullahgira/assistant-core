@@ -51,7 +51,7 @@ class UserService {
     await user.save();
     await allUsers.save();
 
-    return user;
+    return { name: user.name, email: user.email };
   }
 
   async login(body) {
