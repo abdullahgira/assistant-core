@@ -35,7 +35,8 @@ class ScoreService {
     const group = await groupsValidator.validateGroupExistence(groupId);
     groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
-    return group.scores_record.details;
+    const scoresDates = group.scores_record.details.map(s => s.date);
+    return scoresDates;
   }
 
   async setMaxAndRedoScores(token, body, type) {
