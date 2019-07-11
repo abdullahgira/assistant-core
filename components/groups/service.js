@@ -89,14 +89,14 @@ class GroupService {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
-    const validDays = ['sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri'];
-    const validGivenDay = validDays.filter(d => d === day)[0];
+    const validDays = { sat: 1, sun: 2, mon: 3, tue: 4, wed: 5, thu: 6, fri: 7 };
+    const validGivenDay = validDays.hasOwnProperty(day);
 
     if (validGivenDay) {
       return await groupCollection.find({ teacherId: assistant.teacherId, day: day });
     } else {
       const groups = await groupCollection.find({ teacherId: assistant.teacherId });
-      groups.sort((x, y) => validDays.findIndex(i => i === x.day) - validDays.findIndex(i => i === y.day));
+      groups.sort((x, y) => validDays[x.day] - validDays[y.day]);
       return groups;
     }
   }
