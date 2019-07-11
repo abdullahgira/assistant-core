@@ -73,6 +73,31 @@ class ScoreService {
     return { status: 200 };
   }
 
+  async getGroupStudents(token, groupId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
+
+    const group = await groupsValidator.validateGroupExistence(groupId);
+    groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
+
+    if (group.scores_record.length) throw new errorHandler.GroupHasNoScoreRecord();
+
+    const students = await studentTeacherCollection.find({
+      groupId,
+      teacherId: assistant.teacherId
+    });
+
+    const lastRecordedScore = group.scores_record.details[0].date;
+    const studentsDetails = students.map(s => ({
+      name: s.name,
+      _id: s._id,
+      studentNumber: s.studentNumber,
+      score: s.scores.length ? (s.scores[0].date === lastRecordedScore ? s.scores[0].score : 0) : 0
+    }));
+
+    return studentsDetails;
+  }
+
   async addScore(token, body, groupId, studentId) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await groupsValidator.validateAssistantExistence(assistantId);
@@ -168,12 +193,6 @@ class ScoreService {
   }
 
   async getScoresBasedOnDate(token, groupId, date) {
-    // this logic might be an issue in viewing the score of that day only
-
-    // TODO:
-    // * check if date is in gropu.scores_record dates
-    // *
-
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await groupsValidator.validateAssistantExistence(assistantId);
 

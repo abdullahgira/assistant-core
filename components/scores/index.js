@@ -24,7 +24,9 @@ async function getScoresForStudentHandler(req, res) {
 
 async function getScoresBasedOnDateHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const students = await scoreService.getScoresBasedOnDate(token, req.params.groupId, req.query.date);
+  const students = req.query.date
+    ? await scoreService.getScoresBasedOnDate(token, req.params.groupId, req.query.date)
+    : await scoreService.getGroupStudents(token, req.params.groupId);
   res.json(students);
 }
 
