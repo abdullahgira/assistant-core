@@ -38,6 +38,40 @@ class ScoreService {
     return group.scores_record.details;
   }
 
+  async setMaxAndRedoScores(token, body, type) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
+
+    switch (type) {
+      case 'redo': {
+        const { error } = schema.setRedoScores(body);
+        if (error) throw new errorHandler.InvalidBody(error.details[0].message);
+
+        await teacherCollection.updateOne(
+          { _id: assistant.teacherId },
+          { $set: { redoScore: body.score } },
+          { strict: false }
+        );
+        break;
+      }
+      case 'max': {
+        const { error } = schema.setMaxScores(body);
+        if (error) throw new errorHandler.InvalidBody(error.details[0].message);
+
+        await teacherCollection.updateOne(
+          { _id: assistant.teacherId },
+          { $set: { maxScore: body.score } },
+          { strict: false }
+        );
+        break;
+      }
+      default:
+        throw new errorHandler.InvalidType('Type can only be max or redo');
+    }
+
+    return { status: 200 };
+  }
+
   async addScore(token, body, groupId, studentId) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await groupsValidator.validateAssistantExistence(assistantId);
@@ -65,7 +99,8 @@ class ScoreService {
     const lastGroupScoreRecord = group.scores_record.details[0].date;
 
     if (!group.scores_record.details) throw new errorHandler.NoScoreHasBeenRecorded();
-    if (student.scores[0].date === lastGroupScoreRecord) throw new errorHandler.DuplicateScores();
+    if (student.scores.length && student.scores[0].date === lastGroupScoreRecord)
+      throw new errorHandler.DuplicateScores();
 
     const studentScore = {
       score: body.score,
@@ -77,7 +112,7 @@ class ScoreService {
     student.scores.unshift(studentScore);
 
     await student.save();
-    return student.scores;
+    return student.scores[0];
   }
 
   async editScore(token, body, groupId, studentId, scoreId) {
@@ -121,7 +156,23 @@ class ScoreService {
     return student.scores;
   }
 
+  async getScores(token, studentId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
+
+    const student = await groupsValidator.validateStudentExistence(studentId);
+    groupsValidator.validateStudentCanBeModifiedByAssistant(student, assistant);
+
+    return student.scores;
+  }
+
   async getScoresBasedOnDate(token, groupId, date) {
+    // this logic might be an issue in viewing the score of that day only
+
+    // TODO:
+    // * check if date is in gropu.scores_record dates
+    // *
+
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await groupsValidator.validateAssistantExistence(assistantId);
 
@@ -133,61 +184,12 @@ class ScoreService {
     return studentsScores;
   }
 
-  async getLastAttendedStudents(token, groupId) {
-    const assistantId = assistantMiddleware.authorize(token);
-    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
-
-    const group = await groupsValidator.validateGroupExistence(groupId);
-    groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
-
-    let lastAttendanceDate = 0;
-    if (group.attendance_record.details[0]) {
-      lastAttendanceDate = group.attendance_record.details[0].date;
-      return await studentTeacherCollection.find({ 'attendance.details': lastAttendanceDate });
-    } else {
-      return [];
-    }
-  }
-
-  async setMaxAndRedoScores(token, body, type) {
-    const assistantId = assistantMiddleware.authorize(token);
-    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
-
-    switch (type) {
-      case 'redo': {
-        const { error } = schema.setRedoScores(body);
-        if (error) throw new errorHandler.InvalidBody(error.details[0].message);
-
-        await teacherCollection.updateOne(
-          { _id: assistant.teacherId },
-          { $set: { redoScore: body.score } },
-          { strict: false }
-        );
-        break;
-      }
-      case 'max': {
-        const { error } = schema.setMaxScores(body);
-        if (error) throw new errorHandler.InvalidBody(error.details[0].message);
-
-        await teacherCollection.updateOne(
-          { _id: assistant.teacherId },
-          { $set: { maxScore: body.score } },
-          { strict: false }
-        );
-        break;
-      }
-      default:
-        throw new errorHandler.InvalidType('Type can only be max or redo');
-    }
-
-    return { status: 200 };
-  }
-
   async deleteScore(token, groupId, studentId, scoreId) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await groupsValidator.validateAssistantExistence(assistantId);
 
     const student = await groupsValidator.validateStudentExistence(studentId);
+    groupsValidator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
     const group = await groupsValidator.validateGroupExistence(groupId);
     groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
