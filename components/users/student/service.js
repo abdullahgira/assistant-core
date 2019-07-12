@@ -38,7 +38,7 @@ class StudentService {
     // validate student is not with teacher, and that the studentTeacher document is
     // not with another student
     validator.validateDublicateTeacher(student, teacher._id);
-    validator.validateStudentTeacherIsNotWithAnotherStudentd(studentTeacher);
+    validator.validateStudentTeacherIsNotWithAnotherStudent(studentTeacher);
 
     const { _id: studentTeacherId, teacherId, groupId } = studentTeacher;
 
