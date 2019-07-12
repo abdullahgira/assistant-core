@@ -845,10 +845,10 @@ class GroupService {
     const student = await validator.validateStudentExistence(studentId);
     validator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
-    let { booksPayment } = await teacherCollection.findById(assistant.teacherId);
+    let { nBooksPayment, booksPayment } = await teacherCollection.findById(assistant.teacherId);
 
     if (!booksPayment) throw new errorHandler.PaymentAmountIsUnknown('Books payment is unknown');
-    if (!student.booksPayment.totalUnpaid)
+    if (nBooksPayment === student.booksPayment.number)
       throw new errorHandler.PaymentIsAlreadyPaid('Already paid all the money');
 
     if (student.customBooksPayment) {
