@@ -73,6 +73,14 @@ class ScoreService {
     return { status: 200 };
   }
 
+  async getMaxAndRedoScores(token) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await groupsValidator.validateAssistantExistence(assistantId);
+
+    const { maxScore, redoScore } = await teacherCollection.findById(assistant.teacherId);
+    return { maxScore, redoScore };
+  }
+
   async getGroupStudents(token, groupId) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await groupsValidator.validateAssistantExistence(assistantId);

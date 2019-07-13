@@ -11,6 +11,8 @@ router.get('/group_:groupId/students', getScoresBasedOnDateHandler);
 router.get('/group_:groupId/set_new_score_record', setNewScoreRecordHandler);
 
 router.post('/set_score', setScoreHandler);
+router.get('/get_score_info', getScoreHandler);
+
 router.post('/add_score/group_:groupId/student_:studentId', addScoreHandler);
 router.post('/edit_score/group_:groupId/student_:studentId/score_:scoreId', editScoreHandler);
 
@@ -46,6 +48,12 @@ async function setScoreHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const status = await scoreService.setMaxAndRedoScores(token, req.body, req.query.type);
   res.json(status);
+}
+
+async function getScoreHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const score_info = await scoreService.getMaxAndRedoScores(token);
+  res.json(score_info);
 }
 
 async function addScoreHandler(req, res) {
