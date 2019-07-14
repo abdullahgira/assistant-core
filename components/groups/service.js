@@ -11,6 +11,24 @@ const { studentTeacherCollection } = require('../users/studentTeacher.model');
 const assistantMiddleware = require('../users/assistant/middleware');
 
 class GroupService {
+  async _leftRotate(arr, dist) {
+    /**
+     * @param arr -> array
+     * @param dist -> number
+     * @returns arr left rotated by a distance equal to dist
+     */
+
+    for (let i = 0; i < dist; i++) {
+      let j;
+      let temp = arr[0];
+      for (j = 0; j < arr.length - 1; j++) {
+        arr[j] = arr[j + 1];
+      }
+      arr[j] = temp;
+    }
+    return arr;
+  }
+
   async setWeekStart(token, body) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
