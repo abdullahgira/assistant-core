@@ -1,8 +1,9 @@
 const generalErrorHandler = require('../error');
 const { studentTeacherCollection } = require('../studentTeacher.model');
 const { teacherCollection } = require('../teacher/model');
-const { groupCollection } = require('../../groups/model');
+
 const { GroupService } = require('../../groups/service');
+const groupValidator = require('../../groups/validator');
 
 const { studentCollection } = require('./model');
 const schema = require('./schema');
@@ -64,18 +65,23 @@ class StudentService {
     const studentId = middleware.authorize(token);
 
     const studentTeacher = await studentTeacherCollection.findOne({ studentId, teacherId });
+    if (!studentTeacher) throw new generalErrorHandler.InvalidToken();
     return studentTeacher;
   }
 
   async recordAttendance(token, attendanceId, groupId, canAttendFromAnotherGroup) {
     const studentId = middleware.authorize(token);
-    const group = await groupCollection.findById(groupId);
+    const group = await groupValidator.validateGroupExistence(groupId);
 
     let student = await studentTeacherCollection.findOne({ studentId, groupId });
     let studentInGroup = true;
     if (!student) {
       studentInGroup = false;
       student = await studentTeacherCollection.findOne({ studentId, teacherId: group.teacherId });
+    }
+
+    if (!student) {
+      throw new generalErrorHandler.InvalidToken();
     }
 
     if (group.attendance_record.details[0]._id === attendanceId) {

@@ -26,7 +26,7 @@ class InvalidToken extends Error {
   constructor(message = 'Invalid auth token') {
     super(message);
     this.name = 'InvalidToken';
-    this.statusCode = 400;
+    this.statusCode = 401;
   }
 }
 
