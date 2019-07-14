@@ -412,41 +412,13 @@ class GroupService {
     return response;
   }
 
-  async recordAttendance(token, groupId, studentId) {
-    /**
-     * @param token -> json web token
-     * @param groupId -> the group id at wich the attendance will be recorded
-     * @param studentId -> the id of the student that will record attendance
-     * @returns the student after attendance has been recorded
-     *
-     * It checks if the student is from the same group, if the student is from another group,
-     * it sets attendedFromAnotherGroup to true, and doesn't delete the latest recorded absence,
-     * because his absence was not recorded with this group.
-     *
-     * If the student is from the same group, the latest absence is removed.
-     *
-     * For both students, a new attendance record is added to them and a hasRecordedAttendance
-     * property is set to true to prevent more than one attendance record for the same student,
-     * this property is reset when a new attendance record is requested.
-     */
-
-    const assistantId = assistantMiddleware.authorize(token);
-    const assistant = await validator.validateAssistantExistence(assistantId);
-
-    const group = await validator.validateGroupExistence(groupId);
-    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
-
-    const student = await validator.validateStudentExistence(studentId);
-    validator.validateStudentCanBeModifiedByAssistant(student, assistant);
-
-    const teacher = await teacherCollection.findById(assistant.teacherId);
-
+  static async attendanceHandler(teacher, group, student) {
     const attendanceDate = new Date(Date.now()).toLocaleString().split(' ')[0];
     let removeAbsence = true;
 
     if (student.attendance.hasRecordedAttendance) {
       throw new errorHandler.StudentHasRecordedAttendance();
-    } else if (student.groupId !== groupId) {
+    } else if (student.groupId !== group._id) {
       const studentGroup = await validator.validateGroupExistence(student.groupId);
       const studentGroupDay = teacher.weekDays.findIndex(d => d === studentGroup.day);
       const groupDay = teacher.weekDays.findIndex(d => d === group.day);
@@ -485,15 +457,46 @@ class GroupService {
     student.attendance.number++;
     student.attendance.details.unshift(attendanceDate);
     student.attendance.hasRecordedAttendance = true;
-    student.attendance.lastAttendanceId = groupId;
+    student.attendance.lastAttendanceId = group._id;
 
     if (!teacher.takeMoneyOnAbsence) {
       student.attendancePayment.nAvailableAttendances
         ? student.attendancePayment.nAvailableAttendances--
         : student.attendancePayment.nUnpaidAttendances++;
     }
-
     await student.save();
+  }
+
+  async recordAttendance(token, groupId, studentId) {
+    /**
+     * @param token -> json web token
+     * @param groupId -> the group id at wich the attendance will be recorded
+     * @param studentId -> the id of the student that will record attendance
+     * @returns the student after attendance has been recorded
+     *
+     * It checks if the student is from the same group, if the student is from another group,
+     * it sets attendedFromAnotherGroup to true, and doesn't delete the latest recorded absence,
+     * because his absence was not recorded with this group.
+     *
+     * If the student is from the same group, the latest absence is removed.
+     *
+     * For both students, a new attendance record is added to them and a hasRecordedAttendance
+     * property is set to true to prevent more than one attendance record for the same student,
+     * this property is reset when a new attendance record is requested.
+     */
+
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    const group = await validator.validateGroupExistence(groupId);
+    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
+
+    const student = await validator.validateStudentExistence(studentId);
+    validator.validateStudentCanBeModifiedByAssistant(student, assistant);
+
+    const teacher = await teacherCollection.findById(assistant.teacherId);
+
+    await GroupService.attendanceHandler(teacher, group, student);
     return student;
   }
 
