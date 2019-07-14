@@ -442,14 +442,42 @@ class GroupService {
     const teacher = await teacherCollection.findById(assistant.teacherId);
 
     const attendanceDate = new Date(Date.now()).toLocaleString().split(' ')[0];
+    let removeAbsence = true;
 
-    if (student.groupId !== groupId) {
-      student.attendance.attendedFromAnotherGroup = true;
-    } else if (student.attendance.hasRecordedAttendance) {
+    if (student.attendance.hasRecordedAttendance) {
       throw new errorHandler.StudentHasRecordedAttendance();
-    } else if (student.absence.number) {
-      // avoid students added after setting new attendance record
-      // to have absence = -1
+    } else if (student.groupId !== groupId) {
+      const studentGroup = await validator.validateGroupExistence(student.groupId);
+      const studentGroupDay = teacher.weekDays.findIndex(d => d === studentGroup.day);
+      const groupDay = teacher.weekDays.findIndex(d => d === group.day);
+
+      const lastStudentGroupAttendance = studentGroup.attendance_record.details.length
+        ? studentGroup.attendance_record.details[0].date
+        : '';
+      const lastGroupAttendance = group.attendance_record.details[0].date;
+
+      // cases where student will record attendance normally in his comming group attendnace record
+      // if (
+      //   studentGroup.day === teacher.weekStart ||
+      //   studentGroupDay < groupDay ||
+      //   (groupDay === studentGroupDay && lastStudentGroupAttendance === lastGroupAttendance)
+      // ) {
+      //   removeAbsence = true;
+      // }
+
+      // cases where student will not record attendance in his group
+      if (
+        groupDay < studentGroupDay ||
+        (groupDay === studentGroupDay && lastStudentGroupAttendance !== lastGroupAttendance)
+      ) {
+        removeAbsence = false;
+        student.attendance.attendedFromAnotherGroup = true;
+      }
+    }
+
+    if (removeAbsence && student.absence.number) {
+      //   // avoid students added after setting new attendance record
+      //   // to have absence = -1
       student.absence.number--;
       student.absence.details.shift();
     }
