@@ -485,6 +485,7 @@ class GroupService {
     student.attendance.number++;
     student.attendance.details.unshift(attendanceDate);
     student.attendance.hasRecordedAttendance = true;
+    student.attendance.lastAttendanceId = groupId;
 
     if (!teacher.takeMoneyOnAbsence) {
       student.attendancePayment.nAvailableAttendances
@@ -742,7 +743,8 @@ class GroupService {
 
     const payments = await studentTeacherCollection
       .find({
-        groupId,
+        teacherId: group.teacherId,
+        'attendance.lastAttendanceId': groupId,
         $or: [{ 'attendancePayment.details.date': nowDate }, { 'booksPayment.details.date': nowDate }]
       })
       .sort({ studentNumber: 1 });

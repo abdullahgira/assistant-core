@@ -23,6 +23,7 @@ const studentTeacherSchema = new Schema({
     number: { type: Number, default: 0 },
     attendedFromAnotherGroup: Boolean,
     hasRecordedAttendance: Boolean,
+    lastAttendanceId: { type: String, default: '' },
     details: [String]
   },
   absence: {
