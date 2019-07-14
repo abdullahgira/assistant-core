@@ -55,6 +55,7 @@ const teacherSchema = new Schema({
   maxScore: { type: Number, default: 0 },
   redoScore: { type: Number, default: 0 },
   takeMoneyOnAbsence: { type: Boolean, defaul: false },
+  weekStart: { type: String, default: 'sat' },
   recentlyVerified: Date
 });
 
