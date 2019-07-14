@@ -11,7 +11,7 @@ const { studentTeacherCollection } = require('../users/studentTeacher.model');
 const assistantMiddleware = require('../users/assistant/middleware');
 
 class GroupService {
-  async _leftRotate(arr, dist) {
+  _leftRotate(arr, dist) {
     /**
      * @param arr -> array
      * @param dist -> number
@@ -36,8 +36,10 @@ class GroupService {
     const { error } = schema.setWeekStart(body);
     if (error) throw new errorHandler.GroupCreationError(error.details[0].message);
 
+    const defaultWeekDays = ['sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri'];
     await teacherCollection.findByIdAndUpdate(assistant.teacherId, {
-      weekStart: body.day
+      weekStart: body.day,
+      weekDays: this._leftRotate(defaultWeekDays, defaultWeekDays.findIndex(d => d === body.day))
     });
     return { status: 200 };
   }
