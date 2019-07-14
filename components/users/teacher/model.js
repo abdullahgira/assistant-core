@@ -56,6 +56,7 @@ const teacherSchema = new Schema({
   redoScore: { type: Number, default: 0 },
   takeMoneyOnAbsence: { type: Boolean, defaul: false },
   weekStart: { type: String, default: 'sat' },
+  weekDays: ['sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri'],
   recentlyVerified: Date
 });
 
