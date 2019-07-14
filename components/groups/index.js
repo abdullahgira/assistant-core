@@ -4,6 +4,8 @@ const router = express.Router();
 const { GroupService } = require('./service');
 const groupService = new GroupService();
 
+router.post('/start_week', setStartWeekHandler);
+
 router.get('/', showAllGroupsHandler);
 router.post('/create_group', createGroupHandler);
 router.delete('/group_:groupId', deleteGroupHandler);
@@ -51,6 +53,12 @@ router.get('/take_money_on_absence', setTakeMoneyOnAbsenceHandler);
 
 // switch groups
 router.get('/change_group/group_:fromGroupId/group_:toGroupId/student_:studentId', changeGroupHandler);
+
+async function setStartWeekHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const status = await groupService.setWeekStart(token, req.body);
+  res.json(status);
+}
 
 async function showAllGroupsHandler(req, res) {
   const token = req.headers['x-auth-token'];

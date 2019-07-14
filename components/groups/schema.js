@@ -73,8 +73,18 @@ function nAttendancesPerMonth(body) {
   return Joi.validate(body, schema);
 }
 
+function setWeekStart(body) {
+  const schema = {
+    day: Joi.string()
+      .valid('sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri')
+      .required()
+  };
+  return Joi.validate(body, schema);
+}
+
 exports.createGroup = createGroup;
 exports.addStudent = addStudent;
 exports.editStudent = editStudent;
 exports.paymentAmount = paymentAmount;
 exports.nAttendancesPerMonth = nAttendancesPerMonth;
+exports.setWeekStart = setWeekStart;

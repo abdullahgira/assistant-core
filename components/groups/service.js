@@ -11,6 +11,19 @@ const { studentTeacherCollection } = require('../users/studentTeacher.model');
 const assistantMiddleware = require('../users/assistant/middleware');
 
 class GroupService {
+  async setWeekStart(token, body) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    const { error } = schema.setWeekStart(body);
+    if (error) throw new errorHandler.GroupCreationError(error.details[0].message);
+
+    await teacherCollection.findByIdAndUpdate(assistant.teacherId, {
+      weekStart: body.day
+    });
+    return { status: 200 };
+  }
+
   async createGroup(body, token) {
     /**
      * @param token -> assistant jwt
