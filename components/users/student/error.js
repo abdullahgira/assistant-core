@@ -33,3 +33,4 @@ class NotFromTheGroup extends Error {
 exports.DoublicateEntry = DoublicateEntry;
 exports.StudentHasRecordedAttendance = StudentHasRecordedAttendance;
 exports.InvalidAttendanceId = InvalidAttendanceId;
+exports.NotFromTheGroup = NotFromTheGroup;

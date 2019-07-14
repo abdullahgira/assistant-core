@@ -2,6 +2,7 @@ const generalErrorHandler = require('../error');
 const { studentTeacherCollection } = require('../studentTeacher.model');
 const { teacherCollection } = require('../teacher/model');
 const { groupCollection } = require('../../groups/model');
+const { GroupService } = require('../../groups/service');
 
 const { studentCollection } = require('./model');
 const schema = require('./schema');
@@ -74,31 +75,19 @@ class StudentService {
     let studentInGroup = true;
     if (!student) {
       studentInGroup = false;
-      student = await studentTeacherCollection.findOne({ studentId });
+      student = await studentTeacherCollection.findOne({ studentId, teacherId: group.teacherId });
     }
 
-    const attendanceDate = new Date(Date.now()).toLocaleString();
-
     if (group.attendance_record.details[0]._id === attendanceId) {
-      if (!studentInGroup && canAttendFromAnotherGroup) {
-        student.attendance.attendedFromAnotherGroup = true;
-      } else if (!studentInGroup && !canAttendFromAnotherGroup) {
-        throw new errorHandler.NotFromTheGroup();
-      } else if (student.attendance.hasRecordedAttendance) {
-        throw new errorHandler.StudentHasRecordedAttendance();
-      } else {
-        student.absence.number--;
-        student.absence.details.shift();
+      if (!studentInGroup && canAttendFromAnotherGroup == 'false') throw new errorHandler.NotFromTheGroup();
+      else {
+        const teacher = await teacherCollection.findById(group.teacherId);
+        await GroupService.attendanceHandler(teacher, group, student);
       }
     } else {
       throw new errorHandler.InvalidAttendanceId();
     }
 
-    student.attendance.number++;
-    student.attendance.details.unshift(attendanceDate);
-    student.attendance.hasRecordedAttendance = true;
-
-    await student.save();
     return student.attendance;
   }
 }
