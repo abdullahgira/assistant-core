@@ -66,7 +66,8 @@ class GroupService {
       nAttendancePerMonth,
       booksPayment,
       nBooksPayment,
-      takeMoneyOnAbsence
+      takeMoneyOnAbsence,
+      weekStart
     } = await teacherCollection.findById(assistant.teacherId);
     return {
       attendancePayment,
@@ -74,7 +75,8 @@ class GroupService {
       nAttendancePerMonth,
       booksPayment,
       nBooksPayment,
-      takeMoneyOnAbsence
+      takeMoneyOnAbsence,
+      weekStart
     };
   }
 
