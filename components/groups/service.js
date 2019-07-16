@@ -331,7 +331,7 @@ class GroupService {
     return students;
   }
 
-  async setNewAttendanceRecord(token, groupId) {
+  async setNewAttendanceRecord(token, groupId, date) {
     /**
      * @param token -> json web token
      * @param groupId -> the group id that will have a new attendance record
@@ -357,7 +357,7 @@ class GroupService {
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
     const students = await studentTeacherCollection.find({ groupId: groupId });
-    const nowDate = new Date(Date.now()).toLocaleString().split(' ')[0];
+    const nowDate = date || new Date(Date.now()).toLocaleString().split(' ')[0];
     const attendanceId = shortid.generate();
 
     group.attendance_record.number++;
@@ -412,8 +412,10 @@ class GroupService {
     return response;
   }
 
-  static async attendanceHandler(teacher, group, student) {
-    const attendanceDate = new Date(Date.now()).toLocaleString().split(' ')[0];
+  static async attendanceHandler(teacher, group, student, date) {
+    if (!group.attendance_record.details.length) throw new errorHandler.GroupHasNoAttendanceRecord();
+
+    const attendanceDate = date || group.attendance_record.details[0].date;
     let removeAbsence = true;
 
     if (student.attendance.hasRecordedAttendance) {
@@ -425,7 +427,7 @@ class GroupService {
 
       const lastStudentGroupAttendance = studentGroup.attendance_record.details.length
         ? studentGroup.attendance_record.details[0].date
-        : '';
+        : ''; // the comparison should always evaluate to false
       const lastGroupAttendance = group.attendance_record.details[0].date;
 
       // cases where student will record attendance normally in his comming group attendnace record
@@ -467,7 +469,7 @@ class GroupService {
     await student.save();
   }
 
-  async recordAttendance(token, groupId, studentId) {
+  async recordAttendance(token, groupId, studentId, date) {
     /**
      * @param token -> json web token
      * @param groupId -> the group id at wich the attendance will be recorded
@@ -496,7 +498,7 @@ class GroupService {
 
     const teacher = await teacherCollection.findById(assistant.teacherId);
 
-    await GroupService.attendanceHandler(teacher, group, student);
+    await GroupService.attendanceHandler(teacher, group, student, date);
     return student;
   }
 
@@ -735,14 +737,16 @@ class GroupService {
     return student;
   }
 
-  async showTodayGroupPayment(token, groupId) {
+  async showTodayGroupPayment(token, groupId, date) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
     const group = await validator.validateGroupExistence(groupId);
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
-    const nowDate = new Date(Date.now()).toLocaleString().split(' ')[0];
+    if (!group.attendance_record.details.length) throw new errorHandler.GroupHasNoAttendanceRecord();
+
+    const nowDate = date || group.attendance_record.details[0].date;
 
     const payments = await studentTeacherCollection
       .find({

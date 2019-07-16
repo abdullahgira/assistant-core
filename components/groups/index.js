@@ -111,13 +111,18 @@ async function showGroupStudentsHandler(req, res) {
 
 async function setNewAttendanceRecordHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const message = await groupService.setNewAttendanceRecord(token, req.params.groupId);
+  const message = await groupService.setNewAttendanceRecord(token, req.params.groupId, req.query.date);
   res.json(message);
 }
 
 async function recordAttendanceHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const student = await groupService.recordAttendance(token, req.params.groupId, req.params.studentId);
+  const student = await groupService.recordAttendance(
+    token,
+    req.params.groupId,
+    req.params.studentId,
+    req.query.date
+  );
   res.json(student);
 }
 
