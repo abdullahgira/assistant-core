@@ -40,7 +40,7 @@ async function scoresDatesHandler(req, res) {
 
 async function setNewScoreRecordHandler(req, res) {
   const token = req.headers['x-auth-token'];
-  const date = await scoreService.setNewScoreRecord(token, req.params.groupId);
+  const date = await scoreService.setNewScoreRecord(token, req.params.groupId, req.query.date);
   res.json(date);
 }
 

@@ -10,14 +10,14 @@ const { studentTeacherCollection } = require('../users/studentTeacher.model');
 const assistantMiddleware = require('../users/assistant/middleware');
 
 class ScoreService {
-  async setNewScoreRecord(token, groupId) {
+  async setNewScoreRecord(token, groupId, date) {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await groupsValidator.validateAssistantExistence(assistantId);
 
     const group = await groupsValidator.validateGroupExistence(groupId);
     groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
-    const nowDate = new Date(Date.now()).toLocaleString().split(' ')[0];
+    const nowDate = date || new Date(Date.now()).toLocaleString().split(' ')[0];
     group.scores_record.number++;
     group.scores_record.details.unshift({
       _id: shortid.generate(),
@@ -88,7 +88,7 @@ class ScoreService {
     const group = await groupsValidator.validateGroupExistence(groupId);
     groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
-    if (group.scores_record.length) throw new errorHandler.GroupHasNoScoreRecord();
+    if (!group.scores_record.number) throw new errorHandler.GroupHasNoScoreRecord();
 
     const students = await studentTeacherCollection.find({
       groupId,
@@ -130,11 +130,11 @@ class ScoreService {
       );
     }
 
-    const lastGroupScoreRecord = group.scores_record.details[0].date;
-
     if (!group.scores_record.details) throw new errorHandler.NoScoreHasBeenRecorded();
     if (student.scores.length && student.scores[0].date === lastGroupScoreRecord)
       throw new errorHandler.DuplicateScores();
+
+    const lastGroupScoreRecord = group.scores_record.details[0].date;
 
     const studentScore = {
       score: body.score,

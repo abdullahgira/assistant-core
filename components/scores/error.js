@@ -39,7 +39,7 @@ class StudentHasNotAttendedLastGroupAttendance extends Error {
 }
 
 class GroupHasNoScoreRecord extends Error {
-  constructor(message = 'The group has not recorded any attendance') {
+  constructor(message = 'Group has no score record') {
     super(message);
     this.name = 'GroupHasNoScoreRecord';
     this.statusCode = 400;
