@@ -38,6 +38,14 @@ class StudentHasNotAttendedLastGroupAttendance extends Error {
   }
 }
 
+class GroupHasNoAttendanceRecord extends Error {
+  constructor(message = 'Group has no attendance record') {
+    super(message);
+    this.name = 'GroupHasNoAttendanceRecord';
+    this.statusCode = 400;
+  }
+}
+
 class GroupHasNoScoreRecord extends Error {
   constructor(message = 'Group has no score record') {
     super(message);
@@ -61,3 +69,4 @@ exports.InvalidScoreId = InvalidScoreId;
 exports.StudentHasNotAttendedLastGroupAttendance = StudentHasNotAttendedLastGroupAttendance;
 exports.GroupHasNoScoreRecord = GroupHasNoScoreRecord;
 exports.DuplicateScores = DuplicateScores;
+exports.GroupHasNoAttendanceRecord = GroupHasNoAttendanceRecord;

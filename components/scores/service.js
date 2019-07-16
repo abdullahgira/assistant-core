@@ -17,7 +17,15 @@ class ScoreService {
     const group = await groupsValidator.validateGroupExistence(groupId);
     groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
-    const nowDate = date || new Date(Date.now()).toLocaleString().split(' ')[0];
+    if (!group.attendance_record.number) throw new errorHandler.GroupHasNoAttendanceRecord();
+    if (
+      group.scores_record.number &&
+      (group.scores_record.details[0].date === group.attendance_record.details[0].date ||
+        group.scores_record.details[0].date === date)
+    )
+      throw new errorHandler.DuplicateScores();
+
+    const nowDate = date || group.attendance_record.details[0].date;
     group.scores_record.number++;
     group.scores_record.details.unshift({
       _id: shortid.generate(),
