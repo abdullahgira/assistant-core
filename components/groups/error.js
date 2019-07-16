@@ -22,6 +22,14 @@ class InvalidGroupId extends Error {
   }
 }
 
+class GroupHasNoAttendanceRecord extends Error {
+  constructor(message = 'Group has no attendance record') {
+    super(message);
+    this.name = 'GroupHasNoAttendanceRecord';
+    this.statusCode = 400;
+  }
+}
+
 class Forbidden extends Error {
   constructor(message = 'Forbidden access to a group that doesn\'t relate to the teacher.') {
     super(message);
@@ -106,3 +114,4 @@ exports.PaymentAmountIsUnknown = PaymentAmountIsUnknown;
 exports.PaymentIsAlreadyPaid = PaymentIsAlreadyPaid;
 exports.NotAllowed = NotAllowed;
 exports.StudentIsNotInGroup = StudentIsNotInGroup;
+exports.GroupHasNoAttendanceRecord = GroupHasNoAttendanceRecord;
