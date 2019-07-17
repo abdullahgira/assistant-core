@@ -138,11 +138,11 @@ class ScoreService {
       );
     }
 
+    const lastGroupScoreRecord = group.scores_record.details[0].date;
+
     if (!group.scores_record.details) throw new errorHandler.NoScoreHasBeenRecorded();
     if (student.scores.length && student.scores[0].date === lastGroupScoreRecord)
       throw new errorHandler.DuplicateScores();
-
-    const lastGroupScoreRecord = group.scores_record.details[0].date;
 
     const studentScore = {
       score: body.score,
