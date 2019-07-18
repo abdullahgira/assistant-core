@@ -3,7 +3,7 @@ const Joi = require('joi');
 function addScore(body) {
   const schema = {
     score: Joi.number()
-      .min(1)
+      .min(0)
       .required()
   };
   return Joi.validate(body, schema);

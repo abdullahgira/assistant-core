@@ -17,7 +17,7 @@ class ScoreService {
     const group = await groupsValidator.validateGroupExistence(groupId);
     groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
-    if (!group.attendance_record.number) throw new errorHandler.GroupHasNoAttendanceRecord();
+    if (!group.attendance_record.number && !date) throw new errorHandler.GroupHasNoAttendanceRecord();
     if (
       group.scores_record.number &&
       (group.scores_record.details[0].date === group.attendance_record.details[0].date ||
@@ -131,18 +131,19 @@ class ScoreService {
     if (!maxScore) {
       throw new errorHandler.InvalidScoreValue('you have to set Max Score');
     }
-
     if (body.score > maxScore) {
       throw new errorHandler.InvalidScoreValue(
         `score must be smaller than or equal to the maximum score (${maxScore})!`
       );
     }
 
+    if (!group.scores_record.details) throw new errorHandler.NoScoreHasBeenRecorded();
     const lastGroupScoreRecord = group.scores_record.details[0].date;
 
-    if (!group.scores_record.details) throw new errorHandler.NoScoreHasBeenRecorded();
     if (student.scores.length && student.scores[0].date === lastGroupScoreRecord)
       throw new errorHandler.DuplicateScores();
+
+    body.score = parseFloat(body.score);
 
     const studentScore = {
       score: body.score,
