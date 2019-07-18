@@ -1,3 +1,11 @@
+class InvlalidTeacherId extends Error {
+  constructor(message = 'Not a valid teacher id') {
+    super(message);
+    this.name = 'InvlalidTeacherId';
+    this.statusCode = 400;
+  }
+}
+
 class DoublicateEntry extends Error {
   constructor(message = 'You already joined this teacher') {
     super(message);
@@ -30,6 +38,7 @@ class NotFromTheGroup extends Error {
   }
 }
 
+exports.InvlalidTeacherId = InvlalidTeacherId;
 exports.DoublicateEntry = DoublicateEntry;
 exports.StudentHasRecordedAttendance = StudentHasRecordedAttendance;
 exports.InvalidAttendanceId = InvalidAttendanceId;

@@ -13,7 +13,7 @@ exports.validateStudentExistence = async studentId => {
 
 exports.validateStudentTeacherExistence = async studentTeacherId => {
   const studentTeacher = await studentTeacherCollection.findById(studentTeacherId);
-  if (!studentTeacher) throw new generalUserErrorHandler.InvalidUserId();
+  if (!studentTeacher) throw new errorHandler.InvlalidTeacherId();
   return studentTeacher;
 };
 
