@@ -26,6 +26,7 @@ class ScoreService {
       throw new errorHandler.DuplicateScores();
 
     const nowDate = date || group.attendance_record.details[0].date;
+
     group.scores_record.number++;
     group.scores_record.details.unshift({
       _id: shortid.generate(),
@@ -150,8 +151,10 @@ class ScoreService {
 
     const studentScore = {
       score: body.score,
-      hasToMakeRedo: redoScore === 0 ? false : body.score <= redoScore,
-      hasGotMaxScore: body.score === maxScore,
+      // hasToMakeRedo: redoScore === 0 ? false : body.score <= redoScore,
+      // hasGotMaxScore: body.score === maxScore,
+      maxScore,
+      redoScore,
       date: lastGroupScoreRecord
     };
 
@@ -174,25 +177,17 @@ class ScoreService {
     const student = await groupsValidator.validateStudentExistence(studentId);
     groupsValidator.validateStudentCanBeModifiedByAssistant(student, assistant);
 
-    const { maxScore, redoScore } = await teacherCollection.findById(assistant.teacherId);
-    if (!maxScore) {
-      throw new errorHandler.InvalidScoreValue('you have to set max score!');
-    }
-
-    if (body.score > maxScore) {
-      throw new errorHandler.InvalidScoreValue(
-        `score must be smaller than or equal to the maximum score (${maxScore})!`
-      );
-    }
-
-    const studentScore = {
-      score: body.score,
-      hasToMakeRedo: redoScore === 0 ? false : body.score <= redoScore,
-      hasGotMaxScore: body.score === maxScore
-    };
-
     const scoreIndex = student.scores.findIndex(s => String(s._id) === scoreId);
     if (scoreIndex !== -1) {
+      const maxScore = student.scores[scoreIndex].maxScore;
+
+      if (body.score > maxScore) {
+        throw new errorHandler.InvalidScoreValue(
+          `score must be smaller than or equal to the maximum score (${maxScore})!`
+        );
+      }
+
+      const studentScore = { score: body.score, maxScore, redoScore: student.scores[scoreIndex].redoScore };
       student.scores[scoreIndex] = { _id: scoreId, ...studentScore, date: student.scores[scoreIndex].date };
     } else {
       throw new errorHandler.InvalidScoreId();
