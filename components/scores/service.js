@@ -111,6 +111,9 @@ class ScoreService {
       score: s.scores.length ? (s.scores[0].date === lastRecordedScore ? s.scores[0].score : 0) : 0
     }));
 
+    studentsDetails.sort(
+      (a, b) => parseInt(a.studentNumber.match(/\d+/g)[0]) - parseInt(b.studentNumber.match(/\d+/g)[0])
+    );
     return studentsDetails;
   }
 
@@ -229,6 +232,10 @@ class ScoreService {
       score: s.scores[0],
       studentNumber: s.studentNumber
     }));
+
+    studentsScores.sort(
+      (a, b) => parseInt(a.studentNumber.match(/\d+/g)[0]) - parseInt(b.studentNumber.match(/\d+/g)[0])
+    );
     return studentsScores;
   }
 

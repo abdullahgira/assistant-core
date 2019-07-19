@@ -327,7 +327,11 @@ class GroupService {
     const group = await validator.validateGroupExistence(groupId);
 
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
-    const students = await studentTeacherCollection.find({ groupId }).sort({ studentNumber: 1 });
+    const students = await studentTeacherCollection.find({ groupId }); // .sort({ studentNumber: 1 });
+
+    students.sort(
+      (a, b) => parseInt(a.studentNumber.match(/\d+/g)[0]) - parseInt(b.studentNumber.match(/\d+/g)[0])
+    );
     return students;
   }
 
@@ -748,14 +752,16 @@ class GroupService {
 
     const nowDate = date || group.attendance_record.details[0].date;
 
-    const payments = await studentTeacherCollection
-      .find({
-        teacherId: group.teacherId,
-        'attendance.lastAttendanceId': groupId,
-        $or: [{ 'attendancePayment.details.date': nowDate }, { 'booksPayment.details.date': nowDate }]
-      })
-      .sort({ studentNumber: 1 });
+    const payments = await studentTeacherCollection.find({
+      teacherId: group.teacherId,
+      'attendance.lastAttendanceId': groupId,
+      $or: [{ 'attendancePayment.details.date': nowDate }, { 'booksPayment.details.date': nowDate }]
+    });
+    // .sort({ studentNumber: 1 });
 
+    payments.sort(
+      (a, b) => parseInt(a.studentNumber.match(/\d+/g)[0]) - parseInt(b.studentNumber.match(/\d+/g)[0])
+    );
     let result = {
       overallPayment: 0,
       totalAttendancePayment: 0,
