@@ -10,7 +10,7 @@ const assistantSchema = new Schema({
   name: {
     type: String,
     trim: true,
-    minlength: 4,
+    minlength: 3,
     maxlength: 50
   },
   phone: {

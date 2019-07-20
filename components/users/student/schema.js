@@ -3,7 +3,7 @@ const Joi = require('joi');
 function register(user) {
   const schema = {
     name: Joi.string()
-      .min(4)
+      .min(3)
       .max(255)
       .required(),
     phone: Joi.string()

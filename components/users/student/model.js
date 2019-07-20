@@ -10,7 +10,7 @@ const studentSchema = new Schema({
   name: {
     type: String,
     required: true,
-    minlength: 8,
+    minlength: 3,
     maxlength: 255
   },
   phone: { type: String, required: true },

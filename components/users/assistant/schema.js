@@ -22,7 +22,7 @@ function changeProfile(user) {
       .min(11)
       .max(13),
     name: Joi.string()
-      .min(4)
+      .min(3)
       .max(255),
     email: Joi.string().email({ minDomainAtoms: 2 }),
     password: Joi.string()

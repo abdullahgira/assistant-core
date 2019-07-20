@@ -11,7 +11,7 @@ const teacherSchema = new Schema({
     type: String,
     required: true,
     trim: true,
-    minlength: 4,
+    minlength: 3,
     maxlength: 50
   },
   phone: {
