@@ -214,17 +214,16 @@ class ScoreService {
     const group = await groupsValidator.validateGroupExistence(groupId);
     groupsValidator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
-    const students = await studentTeacherCollection
-      .find({
-        'scores.date': date,
-        teacherId: assistant.teacherId,
-        groupId
-      })
-      .sort({ studentNumber: 1 });
+    const students = await studentTeacherCollection.find({
+      'scores.date': date,
+      teacherId: assistant.teacherId,
+      groupId
+    });
+
     const studentsScores = students.map(s => ({
       _id: s._id,
       name: s.name,
-      score: s.scores[0],
+      score: s.scores.filter(s => s.date === date)[0],
       studentNumber: s.studentNumber
     }));
 
