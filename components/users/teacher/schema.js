@@ -25,7 +25,7 @@ function register(user) {
 function addAssistant(user) {
   const schema = {
     name: Joi.string()
-      .min(4)
+      .min(3)
       .max(255)
       .required()
   };
