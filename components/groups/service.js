@@ -370,6 +370,14 @@ class GroupService {
       date: nowDate // returning the date only
     });
 
+    // TODO: handle mutliple groups at the start week
+    if (group.day === teacher.weekStart) {
+      await studentTeacherCollection.updateMany(
+        { teacherId: teacher._id },
+        { 'attendance.hasRecordedAttendance': false }
+      );
+    }
+
     students.forEach(async s => {
       if (s.attendance.attendedFromAnotherGroup) {
         s.attendance.attendedFromAnotherGroup = false;
@@ -377,7 +385,6 @@ class GroupService {
         // absence record
         s.absence.number++;
         s.absence.details.unshift(nowDate);
-        s.attendance.hasRecordedAttendance = false;
 
         // payment record
         if (teacher.takeMoneyOnAbsence) {
@@ -422,7 +429,9 @@ class GroupService {
     const attendanceDate = date || group.attendance_record.details[0].date;
     let removeAbsence = true;
 
-    if (student.groupId !== group._id) {
+    if (student.attendance.hasRecordedAttendance) {
+      throw new errorHandler.StudentHasRecordedAttendance();
+    } else if (student.groupId !== group._id) {
       const studentGroup = await validator.validateGroupExistence(student.groupId);
       const studentGroupDay = teacher.weekDays.findIndex(d => d === studentGroup.day);
       const groupDay = teacher.weekDays.findIndex(d => d === group.day);
@@ -432,14 +441,7 @@ class GroupService {
         : ''; // the comparison should always evaluate to false
 
       const lastGroupAttendance = group.attendance_record.details[0].date;
-      const lastStudentAttendance = student.attendance.number ? student.attendance.details[0] : '';
 
-      if (
-        student.attendance.lastAttendanceId === group._id &&
-        lastStudentAttendance === lastGroupAttendance
-      ) {
-        throw new errorHandler.StudentHasRecordedAttendance();
-      }
       // cases where student will record attendance normally in his comming group attendnace record
       // if (
       //   studentGroup.day === teacher.weekStart ||
@@ -457,8 +459,6 @@ class GroupService {
         removeAbsence = false;
         student.attendance.attendedFromAnotherGroup = true;
       }
-    } else if (student.attendance.hasRecordedAttendance) {
-      throw new errorHandler.StudentHasRecordedAttendance();
     }
 
     if (removeAbsence && student.absence.number) {
