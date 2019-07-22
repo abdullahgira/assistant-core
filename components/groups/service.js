@@ -422,9 +422,7 @@ class GroupService {
     const attendanceDate = date || group.attendance_record.details[0].date;
     let removeAbsence = true;
 
-    if (student.attendance.hasRecordedAttendance) {
-      throw new errorHandler.StudentHasRecordedAttendance();
-    } else if (student.groupId !== group._id) {
+    if (student.groupId !== group._id) {
       const studentGroup = await validator.validateGroupExistence(student.groupId);
       const studentGroupDay = teacher.weekDays.findIndex(d => d === studentGroup.day);
       const groupDay = teacher.weekDays.findIndex(d => d === group.day);
@@ -432,8 +430,16 @@ class GroupService {
       const lastStudentGroupAttendance = studentGroup.attendance_record.details.length
         ? studentGroup.attendance_record.details[0].date
         : ''; // the comparison should always evaluate to false
-      const lastGroupAttendance = group.attendance_record.details[0].date;
 
+      const lastGroupAttendance = group.attendance_record.details[0].date;
+      const lastStudentAttendance = student.attendance.number ? student.attendance.details[0] : '';
+
+      if (
+        student.attendance.lastAttendanceId === group._id &&
+        lastStudentAttendance === lastGroupAttendance
+      ) {
+        throw new errorHandler.StudentHasRecordedAttendance();
+      }
       // cases where student will record attendance normally in his comming group attendnace record
       // if (
       //   studentGroup.day === teacher.weekStart ||
@@ -451,6 +457,8 @@ class GroupService {
         removeAbsence = false;
         student.attendance.attendedFromAnotherGroup = true;
       }
+    } else if (student.attendance.hasRecordedAttendance) {
+      throw new errorHandler.StudentHasRecordedAttendance();
     }
 
     if (removeAbsence && student.absence.number) {
