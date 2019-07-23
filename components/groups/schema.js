@@ -28,7 +28,7 @@ function addStudent(body) {
       .min(11)
       .max(13),
     address: Joi.string()
-      .min(10)
+      .min(3)
       .max(150),
     studentNumber: Joi.string().max(20)
   };
@@ -49,7 +49,7 @@ function editStudent(body) {
       .min(11)
       .max(13),
     address: Joi.string()
-      .min(10)
+      .min(3)
       .max(150),
     studentNumber: Joi.string().max(20)
   };

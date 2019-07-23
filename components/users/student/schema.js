@@ -12,7 +12,7 @@ function register(user) {
       .max(13)
       .required(),
     address: Joi.string()
-      .min(10)
+      .min(3)
       .max(150)
       .required(),
     age: Joi.number()
