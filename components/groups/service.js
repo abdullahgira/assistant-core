@@ -361,8 +361,13 @@ class GroupService {
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
     const students = await studentTeacherCollection.find({ groupId: groupId });
-    const nowDate = date || new Date(Date.now()).toLocaleString().split(' ')[0];
     const attendanceId = shortid.generate();
+
+    const nowDate = date || new Date(Date.now()).toLocaleString().split(' ')[0];
+    const lastGroupAttendance = group.attendance_record.number ? group.attendance_record.details[0].date : '';
+
+    if (lastGroupAttendance === nowDate)
+      throw new errorHandler.DoublicateEntry(`Group has already recorded attendance at ${nowDate}`);
 
     group.attendance_record.number++;
     group.attendance_record.details.unshift({
