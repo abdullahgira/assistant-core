@@ -401,6 +401,7 @@ class GroupService {
       await s.save();
     });
 
+    group.attendance_analytics.unshift({ date: nowDate, absence: group.students.number });
     await group.save();
     return { _id: attendanceId, date: nowDate, groupId };
   }
@@ -462,6 +463,7 @@ class GroupService {
       await student.save();
     });
 
+    group.attendance_analytics.shift();
     await group.save();
     return { status: 200 };
   }
@@ -484,6 +486,7 @@ class GroupService {
         : ''; // the comparison should always evaluate to false
 
       const lastGroupAttendance = group.attendance_record.details[0].date;
+      group.attendance_analytics[0].fromAnotherGroup++;
 
       // cases where student will record attendance normally in his comming group attendnace record
       // if (
@@ -504,6 +507,9 @@ class GroupService {
       }
     }
 
+    group.attendance_analytics[0].attended++;
+    if (!student.attendance.attendedFromAnotherGroup) group.attendance_analytics[0].absence--;
+
     if (removeAbsence && student.absence.number) {
       //   // avoid students added after setting new attendance record
       //   // to have absence = -1
@@ -521,6 +527,8 @@ class GroupService {
         ? student.attendancePayment.nAvailableAttendances--
         : student.attendancePayment.nUnpaidAttendances++;
     }
+
+    await group.save();
     await student.save();
   }
 
@@ -572,6 +580,16 @@ class GroupService {
     }));
 
     return studentsDetails;
+  }
+
+  async getLastAttendanceAnalytics(token, groupId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    const group = await validator.validateGroupExistence(groupId);
+    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
+
+    return group.attendance_analytics[0];
   }
 
   async setAttendancePaymentAmount(token, body, type) {

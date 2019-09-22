@@ -18,6 +18,12 @@ const groupSchema = new Schema({
     number: { type: Number, default: 0 },
     details: [{ _id: String, date: String }]
   },
+  attendance_analytics: [{
+    attended: { type: Number, default: 0 },
+    absence: { type: Number, default: 0 },
+    fromAnotherGroup: { type: Number, default: 0 },
+    date: String
+  }],
   scores_record: {
     number: { type: Number, default: 0 },
     details: [{ _id: String, date: String }]
