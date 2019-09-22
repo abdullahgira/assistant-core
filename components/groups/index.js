@@ -23,6 +23,7 @@ router.get('/group_:groupId/set_new_attendance_record', setNewAttendanceRecordHa
 router.get('/group_:groupId/record_attendance/student_:studentId', recordAttendanceHandler);
 router.get('/group_:groupId/show_recent_attendance_details', showRecentAttendanceDetailsHandler);
 router.get('/group_:groupId/absent_students', showAbsentStudentsHandler);
+router.get('/group_:groupId/reverse_last_attendance_record', reverseLastAttendanceRecordHandler);
 
 // setting payment amount for books and attendance, and number of attendances per month
 router.post('/set_attendance_payment', setAttendancePaymentHandler); // handles month and lesson using the type query
@@ -113,6 +114,12 @@ async function setNewAttendanceRecordHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const message = await groupService.setNewAttendanceRecord(token, req.params.groupId, req.query.date);
   res.json(message);
+}
+
+async function reverseLastAttendanceRecordHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const status = await groupService.reverseLastAttendanceRecord(token, req.params.groupId);
+  res.json(status);
 }
 
 async function recordAttendanceHandler(req, res) {

@@ -428,6 +428,44 @@ class GroupService {
     return response;
   }
 
+  async reverseLastAttendanceRecord(token, groupId) {
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+    const group = await validator.validateGroupExistence(groupId);
+
+    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
+
+    if (!group.attendance_record.details) {
+      throw new errorHandler.NotAllowed('There are no recorded attendances');
+    }
+
+    const DATE_TO_REMOVE = group.attendance_record.details[0].date;
+    const nowDate = new Date(Date.now()).toLocaleString().split(' ')[0];
+
+    if (!nowDate === DATE_TO_REMOVE) {
+      throw new errorHandler.NotAllowed('Group has not recorded attendance today');
+    }
+
+    group.attendance_record.details.shift();
+    group.attendance_record.number--;
+
+    // students who are recorded absent in that group, absence date is used to verify that the student is not added after the group
+    // has recorded the wrong attendance.
+    const students = await studentTeacherCollection.find({
+      groupId,
+      'absence.details': DATE_TO_REMOVE
+    });
+
+    students.forEach(async student => {
+      student.absence.details.shift();
+      student.absence.number--;
+      await student.save();
+    });
+
+    await group.save();
+    return { status: 200 };
+  }
+
   static async attendanceHandler(teacher, group, student, date) {
     if (!group.attendance_record.details.length) throw new errorHandler.GroupHasNoAttendanceRecord();
 
