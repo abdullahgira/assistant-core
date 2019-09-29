@@ -44,6 +44,7 @@ router.get('/pay_books/student_:studentId', payBooksHandler);
 router.get('/reverse_pay_books/student_:studentId', reversePayBooksHandler);
 
 router.get('/group_:groupId/total_payments', showTodayGroupPaymentHandler);
+router.get('/group_:groupId/unpaid_students', getStudentsWhoHasNotPaidHandler);
 
 // student details
 router.get('/student_:studentId', getStudentDetailsHandler);
@@ -174,6 +175,12 @@ async function showTodayGroupPaymentHandler(req, res) {
   const token = req.headers['x-auth-token'];
   const groupPayment = await groupService.showTodayGroupPayment(token, req.params.groupId);
   res.json(groupPayment);
+}
+
+async function getStudentsWhoHasNotPaidHandler(req, res) {
+  const token = req.headers['x-auth-token'];
+  const students = await groupService.getStudentsWhoHasNotPaid(token, req.params.groupId);
+  res.json(students);
 }
 
 async function getStudentDetailsHandler(req, res) {
