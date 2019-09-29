@@ -1042,6 +1042,43 @@ class GroupService {
     return student;
   }
 
+  async getStudentsWhoHasNotPaid(token, groupId) {
+    /**
+     * 
+     */
+
+    const assistantId = assistantMiddleware.authorize(token);
+    const assistant = await validator.validateAssistantExistence(assistantId);
+
+    const group = await validator.validateGroupExistence(groupId);
+    validator.validateGroupCanBeModifiedByAssistant(group, assistant);
+
+    const result = [
+      // {
+      //   name: "Student",
+      //   studentNumber: "12C"
+      //   nUnpaidAttendances: Number,
+      //   totalUnpaidBooks: Number
+      // }
+    ]
+
+    const students = await studentTeacherCollection.find({ 
+      groupId, 
+      $or: [{ 'attendancePayment.nUnpaidAttendances': { $gt: 0 }}, { 'booksPayment.totalUnpaid': { $gt: 0 }}]
+    });
+
+    for (let student of students) {
+      result.push({
+        studentNumber: student.studentNumber,
+        name: student.name,
+        nUnpaidAttendances: student.attendancePayment.nUnpaidAttendances,
+        totalUnpaidBooks: student.booksPayment.totalUnpaid
+      })
+    }
+    
+    return result;
+  }
+
   async getStudentDetails(token, studentId) {
     /**
      * @param token -> assistant jwt
