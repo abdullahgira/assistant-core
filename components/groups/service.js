@@ -1050,6 +1050,8 @@ class GroupService {
     const assistantId = assistantMiddleware.authorize(token);
     const assistant = await validator.validateAssistantExistence(assistantId);
 
+    const teacher = await teacherCollection.findById(assistant.teacherId);
+
     const group = await validator.validateGroupExistence(groupId);
     validator.validateGroupCanBeModifiedByAssistant(group, assistant);
 
@@ -1064,16 +1066,32 @@ class GroupService {
 
     const students = await studentTeacherCollection.find({ 
       groupId, 
-      $or: [{ 'attendancePayment.nUnpaidAttendances': { $gt: 0 }}, { 'booksPayment.totalUnpaid': { $gt: 0 }}]
+      $or: [
+              { 'attendancePayment.nUnpaidAttendances': { $gt: 0 }}, 
+              { 'booksPayment.totalUnpaid': { $gt: 0 }},
+              { 'booksPayment.totalPaid': 0, 'attendance.number': { $gte: 1} },
+              { 'booksPayment.totalUnpaid': { $lt: 0, $gt: -400 }}
+            ]
     });
 
+    students.sort(
+      (a, b) => parseInt(a.studentNumber.match(/\d+/g)[0]) - parseInt(b.studentNumber.match(/\d+/g)[0])
+    );
+
     for (let student of students) {
+      let totalUnpaidBooks = 0;
+      if (student.booksPayment.totalUnpaid === 0 && student.booksPayment.totalPaid === 0) {
+        totalUnpaidBooks = teacher.booksPayment * teacher.nBooksPayment;
+      } else if (student.booksPayment.totalUnpaid < 0) {
+        totalUnpaidBooks = student.booksPayment.totalUnpaid + (teacher.booksPayment * teacher.nBooksPayment);
+      }
+
       result.push({
         studentNumber: student.studentNumber,
         name: student.name,
         nUnpaidAttendances: student.attendancePayment.nUnpaidAttendances,
-        totalUnpaidBooks: student.booksPayment.totalUnpaid
-      })
+        totalUnpaidBooks: totalUnpaidBooks || student.booksPayment.totalUnpaid
+      });
     }
     
     return result;
