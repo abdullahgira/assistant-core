@@ -1092,7 +1092,6 @@ class GroupService {
         nUnpaidAttendances: student.attendancePayment.nUnpaidAttendances,
         totalUnpaidBooks: totalUnpaidBooks || student.booksPayment.totalUnpaid
       });
-    }
     
     return result;
   }
